@@ -175,3 +175,104 @@ The intended system workflow consists of the following stages:
 
 This workflow represents the proposed architectural flow between the system's major components.
 
+
+
+## 4. Component Communication and Integration
+
+The proposed architecture requires communication between several major components.
+
+
+### 4.1 Frontend and Backend
+
+The frontend communicates with the backend API to submit requests and receive information. The backend processes these requests and applies the appropriate application rules. The frontend should not independently determine whether restricted information may be accessed.
+
+
+### 4.2 Backend and Ingestion Components
+
+The backend coordinates incoming knowledge submissions with the ingestion and processing components. The ingestion pipeline prepares information for subsequent verification and storage.
+
+
+### 4.3 Ingestion and AI Processing
+
+The ingestion pipeline interacts with speech-to-text and other AI-assisted components where automated processing is required. These components produce draft outputs that may require additional validation before approval.
+
+
+### 4.4 Ingestion and Human Review
+
+Information produced through ingestion and AI processing must pass through the appropriate review workflow before being treated as approved repository content. The review process supports verification against original sources and consideration of consent and cultural requirements.
+
+
+### 4.5 Backend and Database
+
+The backend interacts with the relational database to create, retrieve and update structured repository records. The database stores the information required by repository operations, while the backend coordinates application behaviour.
+
+
+### 4.6 Access Control and Retrieval
+
+The backend and retrieval components apply appropriate access restrictions when returning repository information. Access decisions must account for approved cultural protocols, consent requirements, review status and user permissions. Restricted or unapproved information must not be exposed through unauthorised retrieval operations.
+
+
+### 4.7 Offline Interface and Repository Services
+
+The simulated offline or kiosk-style interface provides an alternative method of interacting with repository information. Where offline access is supported, only appropriately approved and authorised information should be available. Offline functionality must account for the need to maintain cultural access restrictions and respond appropriately to changes in permissions or consent.
+
+
+
+## 5. Architectural Design Considerations
+
+The following considerations guide the initial system architecture:
+
+- **Modularity:** Components should have clearly defined responsibilities to support independent development and integration.
+- **Data Integrity:** Repository information should be stored and managed in a structured and consistent manner.
+- **Human Validation:** AI-generated information must undergo appropriate review before approval.
+- **Cultural Safety:** Knowledge must be handled according to approved cultural protocols and community authority.
+- **Access Control:** Repository content must only be made available to appropriately authorised users.
+- **Consent Management:** The system must support the appropriate handling of consent and future changes to consent decisions.
+- **Traceability:** Important processing, review and access decisions should be auditable.
+- **Maintainability:** The architecture should support changes as requirements and implementation decisions evolve.
+- **Accessibility:** The system should consider users with limited connectivity, literacy or access to personal devices.
+- **Integration:** Components should communicate through clearly defined interfaces to support reliable system operation.
+
+
+
+## 6. Architectural Integration Considerations
+
+The system architecture identifies several important dependencies between components.
+
+
+### 6.1 Database and Backend Integration
+
+The backend requires an appropriate interface for interacting with the relational database. Database operations must support the storage and retrieval of knowledge items and their associated information.
+
+
+### 6.2 Ingestion and Review Integration
+
+The ingestion pipeline must communicate with the quarantine and review workflow. This ensures that incoming and AI-generated information cannot bypass the required verification process.
+
+
+### 6.3 Review and Repository Storage
+
+The review workflow must distinguish between pending, approved and rejected information. Only appropriately approved information should become eligible for normal repository retrieval, subject to applicable consent and access restrictions.
+
+
+### 6.4 Access Control and Cultural Governance
+
+Access-control functionality must operate consistently with the repository's cultural protocols, consent requirements and user permissions. The architecture must support restrictions determined through appropriate community governance rather than assuming that all knowledge can be shared publicly.
+
+
+### 6.5 Component Interfaces
+
+The frontend, backend, ingestion pipeline, AI-processing components and database require clearly defined communication interfaces. Detailed API contracts, request formats, response structures and error-handling arrangements will be documented separately as part of the system integration design.
+
+
+
+## 7. Summary
+
+The proposed high-level architecture establishes an initial technical foundation for the Traditional Knowledge Repository by identifying its major components and their intended interactions.
+
+The design separates user interaction, backend coordination, data ingestion, AI-assisted processing, human review, structured storage and access control into distinct areas of responsibility.
+
+This approach supports incremental development and integration while keeping cultural governance, human validation and responsible handling of traditional knowledge central to the system.
+
+The architecture may be refined as the system requirements and features are clarified through implementation, integration, testing, and feedback.
+
