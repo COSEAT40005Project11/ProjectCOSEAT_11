@@ -1,9 +1,9 @@
-# Responsibilities of System Components
+# System Component Responsibilities
 
 
 ## 1. Outline
 
-This document defines the proposed responsibilities and boundaries of the main components within the Traditional Knowledge Repository. 
+This document defines the proposed responsibilities and boundaries of the main components that have been identified as an aspect of the Traditional Knowledge Repository. 
 
 The purpose is to establish a clear separation of responsibilities between user interaction, backend coordination, knowledge ingestion, AI-assisted processing, human review, data storage and access control. 
 
@@ -170,24 +170,6 @@ Responsibility boundaries:
 - Must apply rules approved through appropriate community governance and project requirements.
 
 
-### 2.9 Simulated Offline and Kiosk Interface
-
-The simulated offline or kiosk-style interface is responsible for supporting accessible repository interaction in environments with limited connectivity.
-
-Primary responsibilities:
-
-- Providing accessible navigation and interaction.
-- Supporting pictographic or voice-assisted interface features.
-- Supporting approved repository browsing under limited-connectivity conditions.
-- Demonstrating selected offline-capable functionality.
-
-Responsibility boundaries:
-
-- Does not bypass access-control or consent requirements.
-- Must not expose restricted information through unauthorised offline storage or retrieval.
-- Relies on appropriately governed repository information and services.
-
-
 
 ## 3. Separation of Responsibilities
 
@@ -195,7 +177,7 @@ The proposed architecture separates responsibilities across components to suppor
 
 The primary separation of responsibilities is as follows:
 
-- **User interaction:** Web frontend and simulated offline/kiosk interface.
+- **User interaction:** Web frontend.
 - **Request coordination:** Backend API.
 - **Incoming content preparation:** Data ingestion pipeline.
 - **Audio transcription:** Speech-to-text processing.
@@ -242,10 +224,24 @@ Communication between components requires clearly defined interfaces to support 
 
 
 
-## 5. Synopsis
+## 5. Potential Future Extensions
+
+A simulated offline or kiosk-style interface may be considered in later project stages to support accessible repository interaction in environments with limited connectivity.
+
+Potential responsibilities include:
+
+- Providing accessible navigation and interaction.
+- Supporting pictographic or voice-assisted interface features.
+- Supporting access to appropriately approved repository information under limited-connectivity conditions.
+
+Any future implementation must respect existing access-control, consent and cultural governance requirements.
+
+
+
+## 6. Synopsis
 
 The proposed component responsibilities establish clear boundaries between the major functions of the Traditional Knowledge Repository. Each component has a defined role in supporting knowledge submission, processing, review, storage, retrieval or access control.
 
-This separation supports modular development and future integration while ensuring that AI-generated information remains subject to human validation and that cultural governance requirements remain central to repository operations.
+This separation supports modular development and future integration while ensuring that AI-generated information remains subject to human validation and cultural governance requirements remain central to repository functions.
 
 The responsibilities may be adjusted as the architecture evolves through implementation, testing and feedback.
