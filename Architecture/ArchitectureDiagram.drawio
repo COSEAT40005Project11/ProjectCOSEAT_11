@@ -1,0 +1,157 @@
+<mxfile host="app.diagrams.net">
+  <diagram name="Page-1" id="_K8TNAOnn65m9ZXffiRw">
+    <mxGraphModel dx="1138" dy="663" grid="0" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1100" pageHeight="850" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="ZIPiXTy-tPq30QM8eOVb-41" edge="1" parent="1" source="7pAP0WqU_8afmjEPQr6L-1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.75;exitY=0;exitDx=0;exitDy=0;entryX=0;entryY=1;entryDx=0;entryDy=0;" target="7pAP0WqU_8afmjEPQr6L-5">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="554.3" y="419.8" />
+              <mxPoint x="802.6" y="419.8" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="ZIPiXTy-tPq30QM8eOVb-43" connectable="0" parent="ZIPiXTy-tPq30QM8eOVb-41" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" value="&lt;font style=&quot;font-size: 12px;&quot; face=&quot;Georgia&quot;&gt;Content processing&lt;/font&gt;" vertex="1">
+          <mxGeometry relative="1" x="-0.22" y="1" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="ZIPiXTy-tPq30QM8eOVb-46" edge="1" parent="1" source="7pAP0WqU_8afmjEPQr6L-1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=0.25;entryY=0;entryDx=0;entryDy=0;" target="7pAP0WqU_8afmjEPQr6L-3">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="ZIPiXTy-tPq30QM8eOVb-47" connectable="0" parent="ZIPiXTy-tPq30QM8eOVb-46" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" value="&lt;font style=&quot;font-size: 12px;&quot; face=&quot;Georgia&quot;&gt;Audio transcription&lt;/font&gt;" vertex="1">
+          <mxGeometry relative="1" x="-0.22" y="-1" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="ZIPiXTy-tPq30QM8eOVb-48" edge="1" parent="1" source="7pAP0WqU_8afmjEPQr6L-1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.75;exitY=1;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" target="7pAP0WqU_8afmjEPQr6L-2">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="ZIPiXTy-tPq30QM8eOVb-49" connectable="0" parent="ZIPiXTy-tPq30QM8eOVb-48" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" value="&lt;font style=&quot;font-size: 12px;&quot; face=&quot;Georgia&quot;&gt;Review submission&lt;/font&gt;" vertex="1">
+          <mxGeometry relative="1" x="-0.59" y="1" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="7pAP0WqU_8afmjEPQr6L-1" parent="1" style="rounded=1;whiteSpace=wrap;html=1;roundedPerimeter=1;" value="&lt;font face=&quot;Georgia&quot; style=&quot;font-size: 14px;&quot;&gt;Data Ingestion Pipeline&lt;/font&gt;" vertex="1">
+          <mxGeometry height="60" width="195" x="410" y="455" as="geometry" />
+        </mxCell>
+        <mxCell id="7pAP0WqU_8afmjEPQr6L-2" parent="1" style="rounded=1;whiteSpace=wrap;html=1;roundedPerimeter=1;" value="&lt;font face=&quot;Georgia&quot; style=&quot;font-size: 14px;&quot;&gt;Quarantine &amp;amp; HITL Review&lt;/font&gt;" vertex="1">
+          <mxGeometry height="60" width="196" x="750" y="590" as="geometry" />
+        </mxCell>
+        <mxCell id="ZIPiXTy-tPq30QM8eOVb-62" edge="1" parent="1" source="7pAP0WqU_8afmjEPQr6L-3" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.75;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=1;entryDx=0;entryDy=0;" target="7pAP0WqU_8afmjEPQr6L-2">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="296.3" y="690.7" />
+              <mxPoint x="848" y="690.7" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="ZIPiXTy-tPq30QM8eOVb-63" connectable="0" parent="ZIPiXTy-tPq30QM8eOVb-62" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" value="&lt;font style=&quot;font-size: 12px;&quot; face=&quot;Georgia&quot;&gt;Draft transcripts&lt;/font&gt;" vertex="1">
+          <mxGeometry relative="1" x="-0.04" y="1" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="7pAP0WqU_8afmjEPQr6L-3" parent="1" style="rounded=1;whiteSpace=wrap;html=1;roundedPerimeter=1;" value="&lt;font face=&quot;Georgia&quot; style=&quot;font-size: 14px;&quot;&gt;Speech-to-Text Processing&lt;/font&gt;" vertex="1">
+          <mxGeometry height="60" width="195" x="150" y="590" as="geometry" />
+        </mxCell>
+        <mxCell id="ZIPiXTy-tPq30QM8eOVb-11" edge="1" parent="1" source="7pAP0WqU_8afmjEPQr6L-4" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.25;exitDx=0;exitDy=0;entryX=0;entryY=0.25;entryDx=0;entryDy=0;" target="7pAP0WqU_8afmjEPQr6L-6">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="ZIPiXTy-tPq30QM8eOVb-12" connectable="0" parent="ZIPiXTy-tPq30QM8eOVb-11" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" value="&lt;span style=&quot;font-family: Georgia; font-size: 12px;&quot;&gt;Access decisions&lt;/span&gt;" vertex="1">
+          <mxGeometry relative="1" x="-0.09" y="1" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="7pAP0WqU_8afmjEPQr6L-4" parent="1" style="rounded=1;whiteSpace=wrap;html=1;roundedPerimeter=1;" value="&lt;font face=&quot;Georgia&quot; style=&quot;font-size: 14px;&quot;&gt;Access Control&lt;/font&gt;" vertex="1">
+          <mxGeometry height="55" width="120" x="115" y="280" as="geometry" />
+        </mxCell>
+        <mxCell id="ZIPiXTy-tPq30QM8eOVb-26" edge="1" parent="1" source="7pAP0WqU_8afmjEPQr6L-5" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.75;entryY=0;entryDx=0;entryDy=0;" target="7pAP0WqU_8afmjEPQr6L-2">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="ZIPiXTy-tPq30QM8eOVb-28" connectable="0" parent="ZIPiXTy-tPq30QM8eOVb-26" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" value="&lt;font style=&quot;font-size: 12px;&quot; face=&quot;Georgia&quot;&gt;AI-generated suggestions&lt;/font&gt;" vertex="1">
+          <mxGeometry relative="1" x="-0.1" y="1" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="7pAP0WqU_8afmjEPQr6L-5" parent="1" style="rounded=1;whiteSpace=wrap;html=1;roundedPerimeter=1;" value="&lt;font face=&quot;Georgia&quot; style=&quot;font-size: 14px;&quot;&gt;AI Processing &amp;amp; Retrieval&lt;/font&gt;" vertex="1">
+          <mxGeometry height="60" width="195" x="800" y="292" as="geometry" />
+        </mxCell>
+        <mxCell id="ZIPiXTy-tPq30QM8eOVb-4" edge="1" parent="1" source="7pAP0WqU_8afmjEPQr6L-6" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0;exitY=1;exitDx=0;exitDy=0;entryX=1;entryY=1;entryDx=0;entryDy=0;" target="7pAP0WqU_8afmjEPQr6L-4">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="ZIPiXTy-tPq30QM8eOVb-7" connectable="0" parent="ZIPiXTy-tPq30QM8eOVb-4" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" value="&lt;font style=&quot;font-size: 12px;&quot; face=&quot;Georgia&quot;&gt;Permission checks&lt;/font&gt;" vertex="1">
+          <mxGeometry relative="1" x="-0.02" y="-1" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="ZIPiXTy-tPq30QM8eOVb-21" edge="1" parent="1" source="7pAP0WqU_8afmjEPQr6L-6" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.25;entryDx=0;entryDy=0;startArrow=classic;startFill=1;endArrow=classic;endFill=1;" target="7pAP0WqU_8afmjEPQr6L-5">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="ZIPiXTy-tPq30QM8eOVb-23" connectable="0" parent="ZIPiXTy-tPq30QM8eOVb-21" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" value="&lt;font style=&quot;font-size: 12px;&quot; face=&quot;Georgia&quot;&gt;Retrieval requests / results&lt;/font&gt;" vertex="1">
+          <mxGeometry relative="1" x="-0.05" y="1" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="ZIPiXTy-tPq30QM8eOVb-44" edge="1" parent="1" source="7pAP0WqU_8afmjEPQr6L-6" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.25;exitY=1;exitDx=0;exitDy=0;entryX=0.25;entryY=0;entryDx=0;entryDy=0;" target="7pAP0WqU_8afmjEPQr6L-1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="ZIPiXTy-tPq30QM8eOVb-45" connectable="0" parent="ZIPiXTy-tPq30QM8eOVb-44" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" value="&lt;font style=&quot;font-size: 12px;&quot; face=&quot;Georgia&quot;&gt;Submission processing&lt;/font&gt;" vertex="1">
+          <mxGeometry relative="1" x="-0.04" y="1" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="ZIPiXTy-tPq30QM8eOVb-56" edge="1" parent="1" source="7pAP0WqU_8afmjEPQr6L-6" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0;exitDx=0;exitDy=0;entryX=-0.042;entryY=0.473;entryDx=0;entryDy=0;endArrow=classic;endFill=1;startArrow=classic;startFill=1;" target="7pAP0WqU_8afmjEPQr6L-9">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="545.6" y="153.5" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="ZIPiXTy-tPq30QM8eOVb-57" connectable="0" parent="ZIPiXTy-tPq30QM8eOVb-56" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" value="&lt;font style=&quot;font-size: 12px;&quot; face=&quot;Georgia&quot;&gt;Data operations&lt;/font&gt;" vertex="1">
+          <mxGeometry relative="1" x="0.38" y="1" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="ZIPiXTy-tPq30QM8eOVb-60" edge="1" parent="1" source="7pAP0WqU_8afmjEPQr6L-6" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=1;exitDx=0;exitDy=0;entryX=0;entryY=0;entryDx=0;entryDy=0;endArrow=none;endFill=0;startArrow=classic;startFill=1;" target="7pAP0WqU_8afmjEPQr6L-2">
+          <mxGeometry relative="1" x="0.002" as="geometry">
+            <Array as="points">
+              <mxPoint x="545.6" y="356.4" />
+              <mxPoint x="752.6" y="356.4" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="ZIPiXTy-tPq30QM8eOVb-61" connectable="0" parent="ZIPiXTy-tPq30QM8eOVb-60" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" value="&lt;font style=&quot;font-size: 12px;&quot; face=&quot;Georgia&quot;&gt;Review outcomes&lt;/font&gt;" vertex="1">
+          <mxGeometry relative="1" x="0.65" y="1" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="7pAP0WqU_8afmjEPQr6L-6" parent="1" style="rounded=1;whiteSpace=wrap;html=1;roundedPerimeter=1;align=center;" value="&lt;font style=&quot;font-size: 14px;&quot; face=&quot;Georgia&quot;&gt;Backend API&lt;/font&gt;" vertex="1">
+          <mxGeometry height="55" width="120" x="428" y="280" as="geometry" />
+        </mxCell>
+        <mxCell id="7pAP0WqU_8afmjEPQr6L-9" parent="1" style="rounded=1;whiteSpace=wrap;html=1;roundedPerimeter=1;" value="&lt;font face=&quot;Georgia&quot; style=&quot;font-size: 14px;&quot;&gt;Relational Database&lt;/font&gt;" vertex="1">
+          <mxGeometry height="60" width="195" x="695" y="125" as="geometry" />
+        </mxCell>
+        <mxCell id="ZIPiXTy-tPq30QM8eOVb-9" edge="1" parent="1" source="7pAP0WqU_8afmjEPQr6L-11" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0.25;entryY=0;entryDx=0;entryDy=0;endArrow=classic;endFill=1;startArrow=classic;startFill=1;" target="7pAP0WqU_8afmjEPQr6L-6">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="ZIPiXTy-tPq30QM8eOVb-13" connectable="0" parent="ZIPiXTy-tPq30QM8eOVb-9" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" value="&lt;font style=&quot;font-size: 12px;&quot; face=&quot;Georgia&quot;&gt;Responses&lt;/font&gt;" vertex="1">
+          <mxGeometry relative="1" x="-0.44" y="1" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="ZIPiXTy-tPq30QM8eOVb-14" connectable="0" parent="ZIPiXTy-tPq30QM8eOVb-9" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" value="&lt;font style=&quot;font-size: 12px;&quot; face=&quot;Georgia&quot;&gt;Requests&lt;/font&gt;" vertex="1">
+          <mxGeometry relative="1" x="0.5" y="-1" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="7pAP0WqU_8afmjEPQr6L-11" parent="1" style="rounded=1;whiteSpace=wrap;html=1;roundedPerimeter=1;align=center;" value="&lt;font face=&quot;Georgia&quot; style=&quot;font-size: 14px;&quot;&gt;Web Frontend&lt;/font&gt;" vertex="1">
+          <mxGeometry height="55" width="120" x="175" y="125" as="geometry" />
+        </mxCell>
+        <mxCell id="7pAP0WqU_8afmjEPQr6L-13" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;" value="&lt;h1&gt;&lt;font face=&quot;Georgia&quot; style=&quot;font-size: 15px;&quot;&gt;Proposed High-Level System Architecture&lt;/font&gt;&lt;/h1&gt;&lt;div&gt;&lt;p&gt;&lt;/p&gt;&lt;/div&gt;" vertex="1">
+          <mxGeometry height="50" width="380" x="350" y="20" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
