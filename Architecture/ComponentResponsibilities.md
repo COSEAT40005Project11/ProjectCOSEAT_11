@@ -7,9 +7,7 @@ This document defines the proposed responsibilities and boundaries of the main c
 
 The purpose is to establish a clear separation of responsibilities between user interaction, backend coordination, knowledge ingestion, AI-assisted processing, human review, data storage and access control. 
 
-These responsibilities provide a foundation for component integration and the subsequent definition of API contracts and communication interfaces. 
-
-The responsibilities may be refined as project requirements are clarified through team collaboration and stakeholder feedback.
+These responsibilities provide a foundation for component integration and the subsequent definition of API contracts and communication interfaces. They may be refined as project requirements are clarified through collaboration and stakeholder feedback.
 
 
 
@@ -61,7 +59,7 @@ The data ingestion pipeline is responsible for receiving and preparing incoming 
 
 Primary responsibilities:
 
-- Receiving approved source documents and authorised submissions.
+- Receiving authorised source documents and submissions.
 - Preparing submitted content for processing.
 - Coordinating document-based and audio-based ingestion.
 - Passing appropriate inputs to AI-processing components.
@@ -246,10 +244,8 @@ Communication between components requires clearly defined interfaces to support 
 
 ## 5. Synopsis
 
-The proposed component responsibilities establish clear boundaries between the major functions of the Traditional Knowledge Repository.
-
-Each component has a defined role in supporting knowledge submission, processing, review, storage, retrieval or access control.
+The proposed component responsibilities establish clear boundaries between the major functions of the Traditional Knowledge Repository. Each component has a defined role in supporting knowledge submission, processing, review, storage, retrieval or access control.
 
 This separation supports modular development and future integration while ensuring that AI-generated information remains subject to human validation and that cultural governance requirements remain central to repository operations.
 
-The responsibilities may be refined as the architecture evolves through implementation, integration testing and stakeholder feedback.
+The responsibilities may be adjusted as the architecture evolves through implementation, integration, testing and feedback.
