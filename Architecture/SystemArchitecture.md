@@ -52,7 +52,7 @@ The data ingestion pipeline is responsible for receiving and preparing incoming 
 
 The project proposes two primary ingestion methods:
 
-- Importing information from approved and credible documents or sources.
+- Importing information from authorised and credible documents or sources.
 - Processing authorised audio recordings through speech-to-text transcription.
 
 Its intended responsibilities include:
@@ -143,27 +143,12 @@ Its intended responsibilities include:
 The proposed access categories include public, community-only, restricted and sacred. These categories must be applied according to appropriate community governance and approved system requirements. Access-control decisions must be enforced through the backend rather than relying solely on frontend visibility restrictions.
 
 
-### 2.9 Simulated Offline and Kiosk Interface
-
-The proposed simulated offline or kiosk-style interface supports accessibility in environments with limited connectivity.
-
-Its intended responsibilities include:
-
-- Providing accessible navigation for repository users.
-- Supporting interaction under low-bandwidth conditions.
-- Exploring pictographic and voice-assisted interfaces.
-- Supporting the retrieval of appropriately approved information where offline functionality is available.
-- Demonstrating selected kiosk-style capabilities without requiring physical kiosk hardware.
-
-Offline functionality must preserve the same cultural access restrictions and consent requirements as the connected system.
-
-
 
 ## 3. Proposed High-Level System Workflow
 
 The intended system workflow consists of the following stages:
 
-1. Knowledge is submitted through approved documents, manual entry or authorised audio recordings.
+1. Knowledge is submitted through credible documents, manual entries or authorised audio recordings.
 2. The ingestion pipeline receives and prepares the submitted information.
 3. Speech-to-text or other AI-assisted components may generate draft transcripts, summaries or suggested classifications.
 4. Incoming and AI-generated information enters the quarantine and human-review workflow.
@@ -210,11 +195,6 @@ The backend interacts with the relational database to create, retrieve and updat
 ### 4.6 Access Control and Retrieval
 
 The backend and retrieval components apply appropriate access restrictions when returning repository information. Access decisions must account for approved cultural protocols, consent requirements, review status and user permissions. Restricted or unapproved information must not be exposed through unauthorised retrieval operations.
-
-
-### 4.7 Offline Interface and Repository Services
-
-The simulated offline or kiosk-style interface provides an alternative method of interacting with repository information. Where offline access is supported, only appropriately approved and authorised information should be available. Offline functionality must account for the need to maintain cultural access restrictions and respond appropriately to changes in permissions or consent.
 
 
 
@@ -266,11 +246,24 @@ The frontend, backend, ingestion pipeline, AI-processing components and database
 
 
 
-## 7. Summary
+## 7. Potential Future Extensions
 
-The proposed high-level architecture establishes an initial technical foundation for the Traditional Knowledge Repository by identifying its major components and their intended interactions. The design separates user interaction, backend coordination, data ingestion, AI-assisted processing, human review, structured storage and access control into distinct areas of responsibility. 
+A simulated offline or kiosk-style interface may be considered in later project stages to support accessible repository interaction in environments with limited connectivity.
+
+Potential capabilities include accessible navigation, pictographic or voice-assisted interaction, and retrieval of appropriately approved information under limited-connectivity conditions.
+
+If introduced, the interface may integrate with existing repository services to provide an alternative method of accessing information.
+
+Any future implementation would need to preserve cultural access restrictions, consent requirements and community authority over repository information, including responding appropriately to changes in permissions or consent.
+
+
+
+## 8. Summary
+
+The proposed high-level architecture establishes an initial technical foundation for the Traditional Knowledge Repository by identifying its major components and their intended interactions. 
+
+The design separates user interaction, backend coordination, data ingestion, AI-assisted processing, human review, structured storage and access control into distinct areas of responsibility. 
 
 This approach supports incremental development and integration while keeping cultural governance, human validation and responsible handling of traditional knowledge central to the system.
 
 The architecture may be refined as the system requirements and features are clarified through implementation, integration, testing, and feedback.
-
