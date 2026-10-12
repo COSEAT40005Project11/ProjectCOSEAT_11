@@ -9,7 +9,7 @@ The system aims to support the collection, processing, review, storage and retri
 
 The architecture consists of several interconnected components responsible for user interaction, backend coordination, data ingestion, AI-assisted processing, human review, structured data storage and access control.
 
-The design provides an initial technical foundation for the development and integration of these components. It may be refined as project requirements are clarified through team collaboration and stakeholder feedback.
+The design provides an initial technical foundation for the development and integration of these components. It may be modified as project requirements are clarified throughout the development along with stakeholder feedback.
 
 
 
@@ -268,9 +268,7 @@ The frontend, backend, ingestion pipeline, AI-processing components and database
 
 ## 7. Summary
 
-The proposed high-level architecture establishes an initial technical foundation for the Traditional Knowledge Repository by identifying its major components and their intended interactions.
-
-The design separates user interaction, backend coordination, data ingestion, AI-assisted processing, human review, structured storage and access control into distinct areas of responsibility.
+The proposed high-level architecture establishes an initial technical foundation for the Traditional Knowledge Repository by identifying its major components and their intended interactions. The design separates user interaction, backend coordination, data ingestion, AI-assisted processing, human review, structured storage and access control into distinct areas of responsibility. 
 
 This approach supports incremental development and integration while keeping cultural governance, human validation and responsible handling of traditional knowledge central to the system.
 
