@@ -10,6 +10,12 @@ const ACCESS = {
   restricted: { label: "Restricted",     icon: "\u{1F512}" },
   sacred:     { label: "Sacred",          icon: "\u{26D4}" }
 };
+const USERS = {
+  member: { pw: "member123", role: "member", name: "Community member" },
+  admin:  { pw: "admin123",  role: "admin",  name: "Admin reviewer" }
+};
+const CAN = { guest: ["public"], member: ["public", "community"], admin: ["public", "community", "restricted", "sacred"] };
+const NEED = { submit: ["member", "admin"], review: ["admin"] };
 
 const app = document.getElementById("app");
 const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
@@ -223,6 +229,10 @@ async function refreshCount() {
 }
 
 function show(view) {
+  if (NEED[view] && !NEED[view].includes(role())) {
+    if (role() === "guest") { next = view; toast("Log in to continue."); view = "login"; }
+    else { toast("This page is for admins only."); view = "search"; }
+  }
   document.querySelectorAll("nav button").forEach(b => b.classList.toggle("active", b.dataset.view === view));
   views[view]();
   refreshCount();
