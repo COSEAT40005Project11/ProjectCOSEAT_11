@@ -248,4 +248,4 @@ The proposed component responsibilities establish clear boundaries between the m
 
 This separation supports modular development and future integration while ensuring that AI-generated information remains subject to human validation and that cultural governance requirements remain central to repository operations.
 
-The responsibilities may be adjusted as the architecture evolves through implementation, integration, testing and feedback.
+The responsibilities may be adjusted as the architecture evolves through implementation, testing and feedback.
