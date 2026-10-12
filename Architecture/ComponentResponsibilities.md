@@ -188,3 +188,68 @@ Responsibility boundaries:
 - Does not bypass access-control or consent requirements.
 - Must not expose restricted information through unauthorised offline storage or retrieval.
 - Relies on appropriately governed repository information and services.
+
+
+
+## 3. Separation of Responsibilities
+
+The proposed architecture separates responsibilities across components to support modularity, maintainability and cultural safety.
+
+The primary separation of responsibilities is as follows:
+
+- **User interaction:** Web frontend and simulated offline/kiosk interface.
+- **Request coordination:** Backend API.
+- **Incoming content preparation:** Data ingestion pipeline.
+- **Audio transcription:** Speech-to-text processing.
+- **AI-assisted classification and retrieval:** AI processing and retrieval components.
+- **Human verification:** Quarantine and HITL review workflow.
+- **Structured data storage:** Relational database.
+- **Permission enforcement:** Access-control component.
+
+These components must cooperate to support repository operations without allowing one component to bypass the responsibilities or safeguards of another.
+
+
+
+## 4. Component Coordination Considerations
+
+
+### 4.1 Knowledge Submission
+
+The frontend submits information through the backend, which coordinates ingestion and processing. Incoming information must be directed to the appropriate review workflow before becoming approved repository content.
+
+
+### 4.2 Human Review and Approval
+
+The review component manages review states and supports decisions made by appropriately authorised reviewers. The backend coordinates the associated operations, while storage components maintain the necessary records.
+
+
+### 4.3 Knowledge Retrieval
+
+The frontend requests knowledge through the backend. Retrieval components identify relevant information, while access-control checks determine which information the requesting user is permitted to receive.
+
+
+### 4.4 Database Operations
+
+The backend coordinates the creation, retrieval and modification of structured repository records. Database constraints support data integrity, while application logic governs the permitted operations.
+
+
+### 4.5 Cultural Governance and Consent
+
+Cultural protocols, consent requirements and access permissions must be established through appropriate community governance. System components are responsible for applying these approved requirements within their respective functions. Changes to consent or permissions must be reflected in subsequent access decisions.
+
+
+### 4.6 Component Interfaces
+
+Communication between components requires clearly defined interfaces to support consistent and reliable operation. Detailed API endpoints, request and response formats, and error-handling arrangements will be defined separately as part of the system integration design.
+
+
+
+## 5. Synopsis
+
+The proposed component responsibilities establish clear boundaries between the major functions of the Traditional Knowledge Repository.
+
+Each component has a defined role in supporting knowledge submission, processing, review, storage, retrieval or access control.
+
+This separation supports modular development and future integration while ensuring that AI-generated information remains subject to human validation and that cultural governance requirements remain central to repository operations.
+
+The responsibilities may be refined as the architecture evolves through implementation, integration testing and stakeholder feedback.
