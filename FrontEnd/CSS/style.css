@@ -103,3 +103,24 @@ h1, h2, h3, .hero-title { letter-spacing: -.005em; }
 .check { display: flex; gap: .6rem; align-items: flex-start; font-weight: 400; margin-top: 1rem; }
 .check input { width: 1.2rem; height: 1.2rem; margin-top: .2rem; flex: 0 0 auto; }
 @media (max-width: 700px) { .compare { grid-template-columns: 1fr; } .toolbar { flex-wrap: wrap; } .toolbar select { width: 100%; } }
+
+/* ---- display settings: text size + easy view ---- */
+.tools { display: flex; align-items: center; gap: .5rem; flex-wrap: wrap; justify-content: flex-end; }
+.tool { background: transparent; color: #fff; border: 2px solid rgba(255,255,255,.35); border-radius: 10px; padding: .4rem .75rem; font: inherit; font-size: .9rem; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: .4rem; min-width: 2.75rem; justify-content: center; }
+.tool:hover { background: rgba(255,255,255,.2); }
+.tool[aria-pressed="true"] { background: #fff; color: var(--earth-dark); border-color: #fff; }
+
+/* Easy view: bigger targets, picture-led navigation, less to read */
+body.easy .hero { display: none; }
+body.easy main { margin-top: 1rem; }
+body.easy nav { display: grid; grid-template-columns: repeat(auto-fit, minmax(8.5rem, 1fr)); gap: .6rem; }
+body.easy nav button { flex-direction: column; justify-content: center; padding: .9rem .5rem; font-size: 1.15rem; min-height: 6rem; }
+body.easy nav button .ic { width: 2.2rem; height: 2.2rem; }
+body.easy .sub, body.easy .card .badges .badge:not(.approved):not([class*="lvl-"]) { display: none; }
+body.easy .card { padding: 1.2rem 1.4rem; }
+body.easy .card h3 { font-size: 1.4rem; }
+body.easy .card p { font-size: 1.15rem; }
+body.easy [data-listen] { background: var(--gum); color: #fff; border-color: var(--gum); font-size: 1.1rem; padding: .75rem 1.3rem; }
+body.easy [data-listen] .ic { width: 1.5em; height: 1.5em; }
+body.easy .btn { min-height: 3.25rem; }
+@media (max-width: 600px) { .tools { width: 100%; justify-content: flex-start; } }
