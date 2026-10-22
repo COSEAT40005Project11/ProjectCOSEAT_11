@@ -1,0 +1,74 @@
+{
+  "_note": "Controlled tag vocabulary for the Traditional Knowledge Repository. PLACEHOLDER pending community review. The tagger can only ever suggest a tag that appears in this file or that already sits on an approved record, so this list is the boundary of what the AI is able to propose. Culturally sensitive categories (ceremony, sacred sites, restricted men's or women's knowledge, burial, initiation) are deliberately excluded: those classifications must be made by community authority, never inferred by a machine. See TAGGING.md.",
+  "_review": {
+    "status": "awaiting community review",
+    "reviewed_by": null,
+    "reviewed_at": null
+  },
+  "tags": [
+    {
+      "name": "seasonal knowledge",
+      "terms": ["season", "seasonal", "calendar", "wet season", "dry season", "cycle", "time of year", "monsoon"]
+    },
+    {
+      "name": "plants and bush foods",
+      "terms": ["plant", "plants", "bush food", "bush tucker", "seed", "root", "tuber", "fruit", "berry", "grass", "tree", "bark", "leaf", "leaves"]
+    },
+    {
+      "name": "animals",
+      "terms": ["animal", "animals", "bird", "birds", "fish", "kangaroo", "emu", "goanna", "lizard", "snake", "insect", "tracking", "tracks"]
+    },
+    {
+      "name": "water and waterways",
+      "terms": ["water", "waterhole", "soak", "spring", "river", "creek", "billabong", "rain", "flood", "groundwater"]
+    },
+    {
+      "name": "fire and land management",
+      "terms": ["fire", "burning", "cool burn", "firestick", "land management", "regeneration", "cultural burning"]
+    },
+    {
+      "name": "caring for Country",
+      "terms": ["country", "caring for country", "custodian", "custodianship", "stewardship", "land", "ranger", "healthy country"]
+    },
+    {
+      "name": "language",
+      "terms": ["language", "word", "words", "dialect", "translation", "speaker", "vocabulary", "linguistic", "warumungu"]
+    },
+    {
+      "name": "story and history",
+      "terms": ["story", "stories", "storytelling", "history", "historical", "oral history", "account", "elder told", "passed down"]
+    },
+    {
+      "name": "art and design",
+      "terms": ["art", "painting", "design", "pattern", "weaving", "carving", "ochre", "motif"]
+    },
+    {
+      "name": "kinship and community",
+      "terms": ["kinship", "family", "clan", "community", "skin name", "relation", "relations", "moiety"]
+    },
+    {
+      "name": "health and wellbeing",
+      "terms": ["health", "wellbeing", "medicine", "healing", "bush medicine", "remedy", "nutrition"]
+    },
+    {
+      "name": "navigation and travel",
+      "terms": ["travel", "route", "pathway", "songline", "navigation", "journey", "trade route", "walking track"]
+    },
+    {
+      "name": "tools and making",
+      "terms": ["tool", "tools", "spear", "coolamon", "grinding stone", "making", "craft", "implement"]
+    },
+    {
+      "name": "sky and weather",
+      "terms": ["sky", "star", "stars", "moon", "sun", "constellation", "astronomy", "weather", "wind", "cloud"]
+    },
+    {
+      "name": "data sovereignty and governance",
+      "terms": ["consent", "governance", "sovereignty", "protocol", "attribution", "access", "permission", "care principles", "aiatsis", "ownership"]
+    },
+    {
+      "name": "archives and collections",
+      "terms": ["archive", "archives", "collection", "library", "repository", "catalogue", "record keeping", "digitisation"]
+    }
+  ]
+}

@@ -6,6 +6,8 @@ pdfplumber>=0.11
 pypdf>=5.0
 scikit-learn>=1.3
 numpy>=1.24
+# tests (tests/)
+pytest>=8.0
 # optional: abstractive summaries (preview mode only)
 # transformers>=4.40
 # torch
