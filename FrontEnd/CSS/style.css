@@ -104,6 +104,7 @@ h1, h2, h3, .hero-title { letter-spacing: -.005em; }
 .check input { width: 1.2rem; height: 1.2rem; margin-top: .2rem; flex: 0 0 auto; }
 @media (max-width: 700px) { .compare { grid-template-columns: 1fr; } .toolbar { flex-wrap: wrap; } .toolbar select { width: 100%; } }
 
+ frontend/navigation-display
 /* ---- display settings: text size + easy view ---- */
 .tools { display: flex; align-items: center; gap: .5rem; flex-wrap: wrap; justify-content: flex-end; }
 .tool { background: transparent; color: #fff; border: 2px solid rgba(255,255,255,.35); border-radius: 10px; padding: .4rem .75rem; font: inherit; font-size: .9rem; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: .4rem; min-width: 2.75rem; justify-content: center; }
@@ -124,3 +125,14 @@ body.easy [data-listen] { background: var(--gum); color: #fff; border-color: var
 body.easy [data-listen] .ic { width: 1.5em; height: 1.5em; }
 body.easy .btn { min-height: 3.25rem; }
 @media (max-width: 600px) { .tools { width: 100%; justify-content: flex-start; } }
+
+/* ---- Review queue: tag suggestions ---- */
+.tagbox { margin: .9rem 0 0; }
+.tags-h { font-weight: 700; margin: 0 0 .1rem; }
+.tag { display: flex; gap: .6rem; align-items: center; font-weight: 400; margin: .4rem 0 0; }
+.tag input { width: 1.2rem; height: 1.2rem; flex: 0 0 auto; }
+.tag .agree { margin-left: auto; color: var(--muted); font-size: .85rem; }
+.card .tagev { margin: .1rem 0 0 1.8rem; font-size: .9rem; }
+.card .tagev summary { font-weight: 400; color: var(--muted); }
+.tagev p { margin: .2rem 0; }
+ main
