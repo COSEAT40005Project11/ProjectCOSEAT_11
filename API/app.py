@@ -25,7 +25,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 from fastapi import FastAPI, HTTPException
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 
@@ -89,6 +89,8 @@ def _to_item(rec: dict) -> dict:
         "source_file": rec.get("source_file"),
         "chunk_index": rec.get("chunk_index"),
         "summary_method": rec.get("summary_method"),
+        "reviewed_by": rec.get("reviewed_by"),   # shown as provenance on approved items
+        "reviewed_at": rec.get("reviewed_at"),
     }
 
 
@@ -228,5 +230,11 @@ def health():
 
 # serve the frontend from the same origin so no CORS setup is needed.
 # mounted LAST so it does not shadow the /api and /health routes above.
+# The whole FrontEnd folder is served (not just HTML/) so index.html's ../CSS and ../JS links resolve.
+@app.get("/", include_in_schema=False)
+def home():
+    return RedirectResponse("/HTML/index.html")
+
+
 if FRONTEND_DIR.exists():
-    app.mount("/", StaticFiles(directory=str(FRONTEND_DIR / "HTML"), html=True), name="frontend")
+    app.mount("/", StaticFiles(directory=str(FRONTEND_DIR), html=True), name="frontend")
