@@ -103,3 +103,13 @@ h1, h2, h3, .hero-title { letter-spacing: -.005em; }
 .check { display: flex; gap: .6rem; align-items: flex-start; font-weight: 400; margin-top: 1rem; }
 .check input { width: 1.2rem; height: 1.2rem; margin-top: .2rem; flex: 0 0 auto; }
 @media (max-width: 700px) { .compare { grid-template-columns: 1fr; } .toolbar { flex-wrap: wrap; } .toolbar select { width: 100%; } }
+
+/* ---- Review queue: tag suggestions ---- */
+.tagbox { margin: .9rem 0 0; }
+.tags-h { font-weight: 700; margin: 0 0 .1rem; }
+.tag { display: flex; gap: .6rem; align-items: center; font-weight: 400; margin: .4rem 0 0; }
+.tag input { width: 1.2rem; height: 1.2rem; flex: 0 0 auto; }
+.tag .agree { margin-left: auto; color: var(--muted); font-size: .85rem; }
+.card .tagev { margin: .1rem 0 0 1.8rem; font-size: .9rem; }
+.card .tagev summary { font-weight: 400; color: var(--muted); }
+.tagev p { margin: .2rem 0; }

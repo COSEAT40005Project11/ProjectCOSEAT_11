@@ -106,6 +106,13 @@ const mock = (() => {
     if (p === "/api/pending") return pending.map(x => ({ ...x }));
     if (p === "/api/approved") return approved.map(x => ({ ...x }));
     if (p === "/api/stats") return { pending: pending.length, approved: approved.length, rejected };
+    const tg = p.match(/^\/api\/items\/(.+)\/tags$/);
+    if (tg) return { record_id: decodeURIComponent(tg[1]), applied: false, requires_human_review: true,
+      high_confidence_threshold: 0.55, review_confidence_threshold: 0.25,
+      suggestions: [
+        { tag: "plants and bush foods", confidence: 0.42, status: "needs_review", source: "vocabulary", evidence: [{ matched_terms: ["plant", "bush food"] }] },
+        { tag: "seasonal knowledge", confidence: 0.32, status: "needs_review", source: "vocabulary", evidence: [{ matched_terms: ["season"] }] }
+      ] };
     if (p === "/api/submit") {
       const id = "m" + Date.now();
       pending.push(item(id, body.title, body.text, { access: body.access, confidence: 1, summary_method: "manual", source: body.source || "Manual submission" }));
@@ -117,7 +124,7 @@ const mock = (() => {
       if (!rec) throw new Error("404 item not found in pending queue");
       if (m[2] === "reject") { rejected++; return { ok: true, status: "rejected", id: rec.id }; }
       approved.push({ ...rec, status: "approved", access: body.access, summary: body.summary ?? rec.summary,
-        original_text: body.original_text ?? rec.original_text, reviewed_by: body.reviewed_by, reviewed_at: new Date().toISOString() });
+        original_text: body.original_text ?? rec.original_text, tags: body.tags || [], reviewed_by: body.reviewed_by, reviewed_at: new Date().toISOString() });
       return { ok: true, status: "approved", id: rec.id };
     }
     if (p === "/api/ask") {
@@ -206,7 +213,7 @@ function approvedCard(i) {
   byId[i.id] = i;
   return `<article class="card">
     <h3>${esc(i.title)}</h3>
-    <div class="badges">${badge("Approved", "approved")} ${accessBadge(i.access)} ${badge(i.source)}</div>
+    <div class="badges">${badge("Approved", "approved")} ${accessBadge(i.access)} ${badge(i.source)} ${(i.tags || []).map(t => badge(t)).join(" ")}</div>
     <p>${esc(i.summary)}</p>
     ${SPEECH ? `<div class="actions">${listenBtn(i)}</div>` : ""}
     <details>
@@ -252,6 +259,7 @@ function reviewCard(i) {
         <textarea id="src-${id}" rows="6">${esc(i.original_text)}</textarea>
       </div>
     </div>
+    <div class="tagbox" id="tags-${id}"></div>
     <label for="acc-${id}">Who can see this</label>
     ${accessSelect(i.id, i.access)}
     <div class="actions" style="margin-top:.9rem">
@@ -483,6 +491,7 @@ const views = {
       document.getElementById("rlist").innerHTML = shown.length
         ? shown.map(reviewCard).join("")
         : empty("circle-check", only === "flagged" ? "Nothing is flagged." : "The queue is empty. Nothing is waiting for review.");
+      shown.forEach(i => loadTags(i.id));
     };
     app.querySelectorAll(".chip").forEach(c => c.onclick = () => {
       only = c.dataset.only;
@@ -496,6 +505,25 @@ const views = {
 // ---------------------------------------------------------------------------
 // review decisions
 // ---------------------------------------------------------------------------
+// tag suggestions (retrieval-based tagger). Suggestions only: nothing is applied until the reviewer approves.
+const evidenceText = e => Object.entries(e || {}).map(([k, v]) =>
+  `${esc(k.replace(/_/g, " "))}: ${esc(Array.isArray(v) ? v.join(", ") : v)}`).join(" | ");
+
+async function loadTags(id) {
+  let r;
+  try { r = await api(`/api/items/${encodeURIComponent(id)}/tags`); } catch (e) { return; }  // endpoint missing: show nothing
+  const box = document.getElementById(`tags-${id}`);
+  if (!box) return;   // the page changed while this was loading
+  const lo = r.review_confidence_threshold ?? 0.25, hi = r.high_confidence_threshold ?? 0.55;
+  const list = (r.suggestions || []).filter(s => s.confidence >= lo);
+  box.innerHTML = `<p class="tags-h">Suggested tags</p>
+    <p class="meta">Suggestions only. Ticked tags are saved when you approve. The percentage shows how strongly the word list or similar approved items point to a tag. It does not mean the tag is correct.</p>` +
+    (list.length ? list.map(s => `<label class="tag"><input type="checkbox" value="${esc(s.tag)}" ${s.confidence >= hi ? "checked" : ""}>
+        <span>${esc(s.tag)}</span><span class="agree">agreement ${Math.round(s.confidence * 100)}%</span></label>
+      <details class="tagev"><summary>Why was this suggested?</summary>${(s.evidence || []).map(e => `<p>${evidenceText(e)}</p>`).join("")}</details>`).join("")
+      : `<p class="meta">No tag suggestions for this item.</p>`);
+}
+
 async function decide(id, action) {
   const card = document.getElementById(`card-${id}`);
   card.querySelectorAll("button").forEach(b => (b.disabled = true));
@@ -505,7 +533,8 @@ async function decide(id, action) {
         reviewed_by: session.name,
         access: document.getElementById(`acc-${id}`).value,
         summary: document.getElementById(`sum-${id}`).value,
-        original_text: document.getElementById(`src-${id}`).value
+        original_text: document.getElementById(`src-${id}`).value,
+        tags: [...document.querySelectorAll(`#tags-${id} input[type=checkbox]:checked`)].map(c => c.value)
       });
       toast("Approved and added to the repository");
     } else {
