@@ -416,9 +416,9 @@ const views = {
       session = { role: u.role, name: u.name };
       store.set("sessionStorage", "tkr", session);
       toast("Logged in as " + u.name);
-      const go = next || "search";
+      const dest = next || "search";
       next = null;
-      show(go);
+      go(dest);
     };
   },
 
@@ -458,7 +458,7 @@ const views = {
           source: `Manual submission by ${session.name}; submitter confirmed permission from the knowledge holder`
         });
         toast("Sent for review");
-        show(role() === "admin" ? "review" : "browse");
+        go(role() === "admin" ? "review" : "browse");
       } catch (e) { err.textContent = "Couldn't send it. Check your connection and try again."; go.disabled = false; }
     };
   },
@@ -589,9 +589,23 @@ function chrome() {
     ? `<span class="who ${esc(session.role)}">${esc(session.name)}</span><button id="lo">${ic("log-out")} Log out</button>`
     : `<button id="li">${ic("log-in")} Log in</button>`;
   const lo = document.getElementById("lo"), li = document.getElementById("li");
-  if (lo) lo.onclick = () => { session = null; store.del("sessionStorage", "tkr"); toast("Logged out"); show("search"); };
-  if (li) li.onclick = () => show("login");
+  if (lo) lo.onclick = () => { session = null; store.del("sessionStorage", "tkr"); toast("Logged out"); go("search"); };
+  if (li) li.onclick = () => go("login");
 }
+
+// ---------------------------------------------------------------------------
+// page addresses (#search, #browse ...) so the browser Back/Forward buttons work
+// ---------------------------------------------------------------------------
+const PAGES = ["search", "browse", "submit", "review", "login"];
+const TITLES = { search: "Search", browse: "Browse", submit: "Submit", review: "Review queue", login: "Log in" };
+const pageFromAddress = () => { const v = location.hash.slice(1); return PAGES.includes(v) ? v : "search"; };
+
+// go() = a normal click: adds a step to the browser history, then the hashchange listener shows the page
+function go(view) {
+  if (location.hash.slice(1) === view) show(view);
+  else location.hash = view;
+}
+window.addEventListener("hashchange", () => show(pageFromAddress()));
 
 function show(view) {
   viewGen++;
@@ -600,6 +614,9 @@ function show(view) {
     if (role() === "guest") { next = view; toast("Log in to continue."); view = "login"; }
     else { toast("This page is for reviewers only."); view = "search"; }
   }
+  // keep the address bar in step without adding an extra history step (e.g. after a redirect to login)
+  if (location.hash.slice(1) !== view) history.replaceState(null, "", "#" + view);
+  document.title = `${TITLES[view]} - Traditional Knowledge Repository`;
   document.querySelectorAll("nav button").forEach(b => b.classList.toggle("active", b.dataset.view === view));
   chrome();
   views[view]();
@@ -618,10 +635,41 @@ async function detectApi() {
   } catch (e) { return false; } finally { clearTimeout(timer); }
 }
 
-document.querySelectorAll("nav button").forEach(b => b.onclick = () => show(b.dataset.view));
+// ---------------------------------------------------------------------------
+// display settings: text size and easy view (remembered on this device only)
+// ---------------------------------------------------------------------------
+const SIZES = [{ pct: 100, label: "A" }, { pct: 115, label: "A+" }, { pct: 130, label: "A++" }];
+const prefs = { size: 0, easy: false, ...(store.get("localStorage", "tkr_display") || {}) };
+if (!SIZES[prefs.size]) prefs.size = 0;
+
+function applyDisplay() {
+  const size = SIZES[prefs.size];
+  document.documentElement.style.fontSize = size.pct + "%";
+  document.body.classList.toggle("easy", prefs.easy);
+  const t = document.getElementById("textBtn"), e = document.getElementById("easyBtn");
+  t.innerHTML = `<span aria-hidden="true">${size.label}</span>`;
+  t.setAttribute("aria-label", `Text size ${size.pct}%. Click to change.`);
+  t.title = `Text size: ${size.pct}%`;
+  e.setAttribute("aria-pressed", prefs.easy);
+  e.innerHTML = `${ic("eye")} ${prefs.easy ? "Easy view on" : "Easy view"}`;
+  store.set("localStorage", "tkr_display", prefs);
+}
+document.getElementById("textBtn").onclick = () => {
+  prefs.size = (prefs.size + 1) % SIZES.length;
+  applyDisplay();
+  toast(`Text size ${SIZES[prefs.size].pct}%`);
+};
+document.getElementById("easyBtn").onclick = () => {
+  prefs.easy = !prefs.easy;
+  applyDisplay();
+  toast(prefs.easy ? "Easy view on: bigger buttons, less text" : "Easy view off");
+};
+applyDisplay();
+
+document.querySelectorAll("nav button").forEach(b => b.onclick = () => go(b.dataset.view));
 detectApi().then(ok => {
   USE_API = ok;
   const mode = document.getElementById("mode");
   if (mode) mode.textContent = ok ? "Connected to the repository API." : "Running on sample data (no backend connected).";
-  show("search");
+  show(pageFromAddress());
 });
