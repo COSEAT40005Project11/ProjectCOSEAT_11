@@ -11,3 +11,7 @@ numpy>=1.24
 # torch
 # optional: ASR / audio ingestion (baseline). Also needs ffmpeg on the system.
 # openai-whisper>=20231117
+
+
+#Access Control 
+pyjwt 2.15.1

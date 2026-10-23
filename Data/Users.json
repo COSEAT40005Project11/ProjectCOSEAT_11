@@ -1,0 +1,6 @@
+{
+    "Denver": {
+        "role": "Admin",
+        "password_hash" : "Passwordhash will go here"
+    }
+}

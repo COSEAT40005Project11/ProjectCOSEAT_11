@@ -29,6 +29,17 @@ from fastapi.responses import JSONResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 
+#Access Control Stuff 
+from typing import Literal
+from fastapi import Depends
+from API.policy import LEVELS, CLEARANCE, can_view, can_decide
+#from API.auth import current_user, require_role
+#^ PLANNED HAVE GOTTEN TO IT YET
+
+
+Level = Literal["public", "community", "restricted", "sacred"]
+STAFF = ("reviewer", "custodian", "admin")
+# End of Access Control Stuff
 REPO_ROOT = Path(__file__).resolve().parent.parent
 PENDING_DIR = REPO_ROOT / "AIOutput" / "pending"
 APPROVED_DIR = REPO_ROOT / "AIOutput" / "approved"
@@ -93,6 +104,24 @@ def _to_item(rec: dict) -> dict:
         "reviewed_at": rec.get("reviewed_at"),
     }
 
+# Access Control 
+
+bearer = HTTPBearer(auto_error=False)
+
+def current_user(creds=Depends(bearer)):
+    if creds is None:
+        return {"name": "anonymous", "role": "anonymous"}
+    try:
+        return jwt.decode(creds.credentials, SECRET, algorithms=["HS256"])
+    except jwt.PyJWTError:
+        raise HTTPException(401, "invalid or expired token")
+
+def require_role(*roles):
+    def dep(user=Depends(current_user)):
+        if user["role"] not in roles:
+            raise HTTPException(403, "not allowed")
+        return user
+    return dep
 
 # ---------------------------------------------------------------------------
 # request models
@@ -150,10 +179,14 @@ def get_stats():
 
 
 @app.post("/api/items/{item_id}/approve")
-def approve(item_id: str, body: ApproveBody):
+def approve(item_id: str, body: ApproveBody,user=Depends(require_role(*STAFF))): #Working on this section atm, making sure i have my head wrapped around it first before merging.
+       
     rec = _all_pending_records().get(item_id)
     if rec is None:
         raise HTTPException(404, "item not found in pending queue")
+    if not (can_decide(user, rec.get("access", "community"))       
+            and can_decide(user, body.access)):
+        raise HTTPException(403, "insufficient clearance for this item")
     rec = dict(rec)
     if body.summary is not None:
         rec["summary"] = body.summary
@@ -161,7 +194,7 @@ def approve(item_id: str, body: ApproveBody):
         rec["original_text"] = body.original_text
     rec["access"] = body.access
     rec["status"] = "approved"
-    rec["reviewed_by"] = body.reviewed_by
+    rec["reviewed_by"] = user["name"]  
     rec["reviewed_at"] = datetime.now(timezone.utc).isoformat()
     (APPROVED_DIR / f"{item_id}.json").write_text(
         json.dumps(rec, indent=2, ensure_ascii=False), encoding="utf-8")
