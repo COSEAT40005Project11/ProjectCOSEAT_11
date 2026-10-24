@@ -112,3 +112,77 @@ Descriptive tags are stored in `tags` and associated with knowledge items throug
 Reviewer-confirmed tags may be mapped to these tables after normalisation and duplicate checking. AI-generated tag suggestions should remain distinguishable from confirmed associations and should not automatically be treated as approved metadata.
 
 The current relational structure supports confirmed tag associations. Persistent storage of suggestion confidence, supporting evidence or suggestion history would require a separately defined data structure if introduced.
+
+
+
+## 4. Data Migration and Backend Integration
+
+
+### 4.1 Migration Process
+
+The proposed migration process consists of the following stages:
+
+1. Preserve a backup of the existing JSON data before making changes.
+2. Read and validate pending, approved and rejected records according to their existing JSON structures.
+3. Match multiple occurrences of the same knowledge item using the existing item identifier.
+4. Identify conflicting records or review outcomes for investigation rather than silently overwriting information.
+5. Map validated knowledge content, source metadata and current review status into the corresponding relational tables.
+6. Preserve supported review decisions and reviewer-confirmed tags through their related tables.
+7. Record migration outcomes and verify that repeated execution does not create duplicate knowledge items or review events.
+8. Compare migrated records and API outputs with the original data before changing the application's storage behaviour.
+
+The existing pending files may contain arrays of records, while approved and rejected files may contain individual record objects. These formats must be handled appropriately during parsing.
+
+Where the same item appears in multiple storage locations, the migration should create one current knowledge item record and preserve any supported review history. Unresolved conflicting outcomes should be reported rather than arbitrarily selected.
+
+
+### 4.2 Backend Data Access
+
+The backend API provides the interface through which repository components perform supported database operations.
+
+The proposed integration responsibilities include:
+
+- Validating incoming record data before insertion or update.
+- Translating existing API request fields into database columns and relationships.
+- Retrieving knowledge items according to their review status and authorised access conditions.
+- Recording review decisions and associated changes consistently.
+- Managing tag and protocol associations through the corresponding junction tables.
+- Preserving expected API response structures where existing frontend functionality depends on them.
+
+The retrieval workflow must also use the database-backed source of approved records when the application transitions away from JSON storage. Updating API endpoints alone would not complete that transition.
+
+
+### 4.3 Database Consistency
+
+Database operations should use transactions where multiple related changes must succeed together. Primary keys, foreign keys and constraints should be used to protect record integrity.
+
+Subsequent structural changes should be managed through explicit schema migrations. Re-running an initial `CREATE TABLE IF NOT EXISTS` script does not update existing table definitions or constraints.
+
+
+
+## 5. Validation Considerations
+
+The database mapping and integration should be validated before being treated as operational.
+
+Validation activities should cover:
+
+- Correct creation of the proposed tables, keys, constraints and relationships.
+- Preservation of existing knowledge item identifiers and source metadata.
+- Correct handling of pending, needs-review, approved and rejected states.
+- Accurate storage of review decisions without fabricated history.
+- Prevention of duplicate records during repeated migrations.
+- Correct storage of reviewer-confirmed tags and cultural protocol associations.
+- Appropriate handling of missing consent and restricted access information.
+- Consistency of relevant backend API responses before and after integration.
+
+Initial testing should use synthetic records rather than real culturally sensitive material. Successful schema creation, migration and API integration should be established through executed tests and recorded results.
+
+
+
+## 6. Synopsis
+
+This document outlines the proposed mapping between the Traditional Knowledge Repository's existing data structures and its relational database schema.
+
+It describes the handling of knowledge items, source attribution, review history, user roles, cultural access information and descriptive tags, alongside the main considerations for migration and backend integration.
+
+Together with the database requirements, schema definition, ER diagram and API integration documentation, this mapping provides a reference for implementing and validating consistent data storage across the repository's components.
