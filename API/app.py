@@ -38,7 +38,7 @@ from API.policy import LEVELS, CLEARANCE, can_view, can_decide
 
 
 Level = Literal["public", "community", "restricted", "sacred"]
-STAFF = ("reviewer", "custodian", "admin")
+STAFF = ("admin", "reviewer", "custodian")
 # End of Access Control Stuff
 REPO_ROOT = Path(__file__).resolve().parent.parent
 PENDING_DIR = REPO_ROOT / "AIOutput" / "pending"
@@ -104,24 +104,9 @@ def _to_item(rec: dict) -> dict:
         "reviewed_at": rec.get("reviewed_at"),
     }
 
-# Access Control 
+# Access Control goes here
 
-bearer = HTTPBearer(auto_error=False)
 
-def current_user(creds=Depends(bearer)):
-    if creds is None:
-        return {"name": "anonymous", "role": "anonymous"}
-    try:
-        return jwt.decode(creds.credentials, SECRET, algorithms=["HS256"])
-    except jwt.PyJWTError:
-        raise HTTPException(401, "invalid or expired token")
-
-def require_role(*roles):
-    def dep(user=Depends(current_user)):
-        if user["role"] not in roles:
-            raise HTTPException(403, "not allowed")
-        return user
-    return dep
 
 # ---------------------------------------------------------------------------
 # request models
