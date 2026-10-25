@@ -19,7 +19,7 @@ argon2-cffi-bindings==21.2.0
 PyJWT==2.15.1
 python-dotenv==1.2.2
 python-multipart==0.0.32
-"pydantic[email]" 
+pydantic[email]>=2.0
 
 #pip install pyjwt argon2-cffi python-multipart python-dotenv "pydantic[email]"
 

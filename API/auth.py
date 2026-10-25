@@ -5,7 +5,8 @@ import os
 from dotenv import load_dotenv
 load_dotenv()       
 
-
+from pathlib import Path 
+load_dotenv(Path(__file__).parent / "jwt.env")
 
 from datetime import datetime, timedelta, timezone
 import jwt
@@ -14,14 +15,14 @@ from argon2 import PasswordHasher
 from argon2.exceptions import VerifyMismatchError, InvalidHashError
 from fastapi import Depends, HTTPException
 from fastapi.security import  OAuth2PasswordBearer
-
+from policy import has_permission
 
 
 
 #USERS_FILE = Path(__file__).resolve().parent / "users.json"
 ROLES = ("viewer", "reviewer", "custodian", "admin")   # "anonymous" is implicit
 
-SECRET = os.environ.get["JWT_SECRET"]
+SECRET = os.environ.get("JWT_SECRET")
 if not SECRET or len(SECRET) < 60:  
     raise RuntimeError("SECRET is missing or is too short. Please verify SECRET exists and is 60+ Char")
 
@@ -71,6 +72,15 @@ def get_current_user(token: str = Depends(oauth2_scheme)) -> dict:
 def require_role(*allowed: str):
     def checker(user: dict = Depends(get_current_user)) -> dict:
         if user.get("role") not in allowed:
+            raise HTTPException(403, "Need Higher Clearance")
+        return user
+    return checker
+
+
+
+def require_permission(permission: str): #Using this one for now since in my head it makes more sense to check for the permission to be in the dict
+    def checker(user: dict = Depends(get_current_user)) -> dict:
+        if not has_permission(user, permission):
             raise HTTPException(403, "Need Higher Clearance")
         return user
     return checker

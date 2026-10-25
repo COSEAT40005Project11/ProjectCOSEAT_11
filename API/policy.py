@@ -13,9 +13,9 @@ CLEARANCE = {"anonymous": "public",
 PERMISSIONS = {
     "anonymous": {"knowledge:read"},
     "viewer": {"knowledge:read"},
-    "reviewer": {"knowledge:read","Knowlede:review"},
-    "custodian": {"knowledge:read","Knowlede:review","knowledge:submit", "consent:manage"},
-    "admin": {"knowledge:read", "knowledge:submit","knowledge:delete", "consent:manage","Knowlede:review","knowledge:submit","users:manage"}
+    "reviewer": {"knowledge:read","Knowlede:deicde"},
+    "custodian": {"knowledge:read","Knowlede:deicde","knowledge:submit", "consent:manage"},
+    "admin": {"knowledge:read", "knowledge:submit","knowledge:delete", "consent:manage","Knowlede:deicde","knowledge:submit","users:manage"}
 }
 
 
@@ -25,7 +25,12 @@ PERMISSIONS = {
 
 
 def can_view(user, level):
+    cleareance = CLEARANCE.get(user.get("role"))
+
     return LEVELS.index(level) <= LEVELS.index(CLEARANCE[user["role"]])
 
 def can_decide(user, level):
     return user["role"] in ("viewer","admin", "reviewer", "custodian", "anonymous") and can_view(user, level)
+
+def has_permission(user: dict, permission: str) -> bool:
+    return permission in PERMISSIONS.get(user.get("role"), set())

@@ -33,12 +33,17 @@ from pydantic import BaseModel
 from typing import Literal
 from fastapi import Depends
 from API.policy import LEVELS, CLEARANCE, can_view, can_decide
-#from API.auth import current_user, require_role
+from API.auth import get_current_user, require_role
+
+from API.auth_routes import router as auth_router
+
+
+
 #^ PLANNED HAVE GOTTEN TO IT YET
 
 
 Level = Literal["public", "community", "restricted", "sacred"]
-STAFF = ("admin", "reviewer", "custodian")
+#STAFF = ("admin", "reviewer", "custodian") #removing for now since permissions replace the function of STAFF
 # End of Access Control Stuff
 REPO_ROOT = Path(__file__).resolve().parent.parent
 PENDING_DIR = REPO_ROOT / "AIOutput" / "pending"
@@ -189,7 +194,8 @@ def approve(item_id: str, body: ApproveBody,user=Depends(require_role(*STAFF))):
 
 
 @app.post("/api/submit")
-def submit(body: SubmitBody):
+def submit(body: SubmitBody,  user: dict = Depends(require_role("knowledge:Custodian"))):
+    
     """Manual submission (e.g. an elder recording). Goes to the same HITL queue."""
     import uuid
     rec = {
@@ -255,4 +261,5 @@ def home():
 
 
 if FRONTEND_DIR.exists():
+    app.include_router(auth_router) #access stuff 
     app.mount("/", StaticFiles(directory=str(FRONTEND_DIR), html=True), name="frontend")
