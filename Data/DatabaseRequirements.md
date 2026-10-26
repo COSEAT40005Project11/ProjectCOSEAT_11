@@ -68,6 +68,40 @@ Required information may include:
 - Creation and update information
 
 
+### 2.5 Knowledge Source
+
+A knowledge source represents the origin or reference material associated with one or more repository knowledge items. Source information should be maintained separately where appropriate to support provenance, attribution and traceability without unnecessarily duplicating the same source details across multiple knowledge records.
+
+Required information may include:
+
+- Unique source identifier
+- Source title and author, where available
+- Publication year or other relevant date information
+- Source URL or reference
+- Source notes and original file information
+- Additional structured source metadata
+- Creation information
+
+A single source may be associated with multiple knowledge items or processed content segments. Source records must not be interpreted as evidence of consent or authorisation on their own.
+
+
+### 2.6 Review History
+
+A review history record represents an individual human review decision associated with a knowledge item. Review history should be maintained separately from the item's current review status to support accountability, traceability and preservation of previous decisions.
+
+Required information may include:
+
+- Unique review record identifier
+- Associated knowledge item identifier
+- Reviewer name or recorded reviewer information
+- Review decision
+- Reason or explanation, where available
+- Review timestamp
+- Reviewed summary or original text, where available
+
+A knowledge item may have multiple review history records. Recording a review decision does not independently establish cultural authority or permission to disclose restricted knowledge.
+
+
 
 ## 3. Supporting Information Requirements
 
