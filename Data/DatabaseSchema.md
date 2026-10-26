@@ -172,19 +172,31 @@ The presence of a review decision does not independently establish reviewer auth
 
 ## 3. Entity Relationships
 
-The initial database schema uses relationships between the core entities to avoid unnecessary duplication and maintain consistent references between repository information.
+This revised database schema defines relationships across eight tables using primary keys, foreign keys and junction tables. These relationships support referential integrity, source provenance, descriptive tagging, cultural protocol associations and historical review records.
 
+### 3.1 Users to Knowledge Items
 
-### 3.1 User to Knowledge Items
-
-One user may create multiple knowledge items, while each knowledge item references one creating user.
+One user may be recorded as the creator of multiple knowledge items. Each knowledge item may reference one creating user, although this reference is optional.
 
 **Relationship:** One-to-Many
 
 `users.user_id` → `knowledge_items.created_by`
 
+The `created_by` foreign key is nullable and uses `ON DELETE SET NULL`, allowing the knowledge item to remain when the referenced user is deleted.
 
-### 3.2 Knowledge Items to Tags
+
+### 3.2 Knowledge Sources to Knowledge Items
+
+One knowledge source may be associated with multiple knowledge items or content segments. Each knowledge item may reference one source record.
+
+**Relationship:** One-to-Many
+
+`knowledge_sources.source_id` → `knowledge_items.source_id`
+
+The `source_id` foreign key is nullable and uses `ON DELETE SET NULL`. The knowledge item can therefore remain if its associated source record is deleted, although its structured source reference will be cleared.
+
+
+### 3.3 Knowledge Items to Tags
 
 A knowledge item may have multiple tags, and a tag may be associated with multiple knowledge items. This many-to-many relationship is represented through the `knowledge_item_tags` junction table.
 
@@ -194,8 +206,12 @@ A knowledge item may have multiple tags, and a tag may be associated with multip
 
 `tags.tag_id` → `knowledge_item_tags.tag_id`
 
+The junction table uses the composite primary key (`item_id`, `tag_id`) to prevent duplicate associations.
 
-### 3.3 Knowledge Items to Cultural Protocols
+Both foreign keys use `ON DELETE CASCADE`, so deleting a referenced knowledge item or tag removes the corresponding junction records.
+
+
+### 3.4 Knowledge Items to Cultural Protocols
 
 A knowledge item may be associated with multiple cultural protocols, and a cultural protocol may apply to multiple knowledge items. This many-to-many relationship is represented through the `knowledge_item_protocols` junction table.
 
@@ -205,6 +221,52 @@ A knowledge item may be associated with multiple cultural protocols, and a cultu
 
 `cultural_protocols.protocol_id` → `knowledge_item_protocols.protocol_id`
 
+The junction table uses the composite primary key (`item_id`, `protocol_id`) to prevent duplicate associations.
+
+Both foreign keys use `ON DELETE CASCADE`, so deleting a referenced knowledge item or cultural protocol removes the corresponding junction records. These database rules do not replace the need for culturally appropriate governance of protocol changes.
+
+
+### 3.5 Knowledge Items to Review History
+
+One knowledge item may have multiple historical review records. Each review history record must reference one existing knowledge item.
+
+**Relationship:** One-to-Many
+
+`knowledge_items.item_id` → `review_history.item_id`
+
+The `item_id` foreign key is required and uses `ON DELETE RESTRICT`. This prevents deletion of a knowledge item while associated review history records remain.
+
+The `reviewer_name` attribute is stored as text rather than as a foreign key to `users`. Reviewer identity and authorisation must therefore be addressed outside this relationship.
+
+
+### 3.6 Referential Integrity and Validation Constraints
+
+The proposed SQL schema includes constraints intended to support data consistency and valid relationships.
+
+**Primary and foreign keys:**
+- Primary keys uniquely identify records in each table.
+- Foreign keys connect knowledge items to users and knowledge sources.
+- Junction-table foreign keys connect knowledge items to tags and cultural protocols.
+- Review history records reference existing knowledge items.
+
+**Knowledge item check constraints:**
+- `access_classification`: `public`, `community`, `restricted`, `sacred`
+- `consent_status`: `unknown`, `pending`, `granted`, `denied`, `withdrawn`
+- `review_status`: `pending`, `needs_review`, `approved`, `rejected`
+- `relevance_score`: `NULL` or a value between `0` and `1`, inclusive
+
+**Review history check constraint:**
+- `decision`: `approved` or `rejected`
+
+**Additional integrity provisions:**
+- `tags.tag_name` must be unique.
+- Junction tables use composite primary keys to prevent duplicate associations.
+- The SQL defines indexes on knowledge item review/access fields, source references and review history item/timestamp fields.
+
+These constraints describe the intended SQL design. Their behaviour has not yet been confirmed through database execution and validation.
+
+Database constraints alone do not enforce cultural consent, reviewer authorisation or application-level access permissions.
+
 
 
 ## 4. Initial Design Scope
@@ -212,3 +274,56 @@ A knowledge item may be associated with multiple cultural protocols, and a cultu
 The initial schema intentionally focuses on the core information and relationships required by the current prototype. Review, consent and source information are represented using straightforward attributes within the existing entities where appropriate.
 
 Additional entities or attributes may be introduced if later repository components require more detailed review histories, consent management, provenance records or access-control information. This allows the schema to evolve without introducing unnecessary complexity during the initial prototype stage.
+
+
+
+## 5. Revised Design Scope and Implementation Status
+
+This section extends the initial design scope described in Section 4, documenting the subsequent schema revisions and their current implementation status.
+
+The Sprint 1 database design established six initial tables representing knowledge items, users, tags, cultural protocols and their associated junction tables.
+
+The Sprint 2 revision extends this design to eight tables by introducing `knowledge_sources` and `review_history`. It also expands `knowledge_items` to accommodate fields used by the existing JSON-based ingestion and review workflow.
+
+
+### 5.1 Current Schema Deliverables
+
+The database design is represented by the following artefacts:
+
+- `DatabaseRequirements.md` documents the repository's database requirements.
+- `DatabaseSchema.md` describes the relational entities, attributes, relationships and constraints.
+- `database_schema.sql` contains the proposed MySQL 8.4 database creation statements.
+- `DatabaseMapping.md` describes the proposed mapping between existing JSON-based repository records and the relational schema.
+- The accompanying versions of the entity-relationship diagrams illustrate the database structure and its evolution.
+
+The SQL script is intended for an empty development database. It defines the proposed table structure but does not migrate existing JSON records.
+
+
+### 5.2 Implementation and Validation Boundaries
+
+The following activities remain separate from the preparation of the schema documentation and SQL definitions:
+
+- Executing the SQL script against a MySQL development database.
+- Verifying table creation, primary keys, foreign keys and check constraints.
+- Testing database operations using synthetic or otherwise authorised non-sensitive data.
+- Validating relationships and deletion behaviour.
+- Implementing and testing JSON-to-database migration.
+
+
+### 5.3 Proposed Future Database Activities
+
+- Constructing the database in a local environment to test overall composition.
+- Creating and validating the actual database using the proposed SQL schema.
+- Integrating the database with the existing backend and application workflows.
+- Developing a data access layer to support database operations and migration from the existing JSON-based records.
+- Refining database schema or structure as necessary based on changes to other components of the repository system. 
+- Migrating appropriately authorised real data and testing database functionality, relationships and constraints.
+
+
+### 5.4 Cultural Governance and Future Development
+
+The relational schema provides fields and relationships to support consent tracking, access classification, cultural protocol associations, provenance and human review.
+
+However, the existence of these fields does not independently establish culturally appropriate access, consent or reviewer authority. Such requirements also depend on application-level controls, approved processes and appropriate stakeholder governance.
+
+Further refinements may be necessary following SQL validation, integration testing and stakeholder feedback. Any subsequent schema changes should be reflected in the SQL script, database documentation and revised entity-relationship diagram.
