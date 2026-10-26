@@ -15,7 +15,7 @@ from argon2 import PasswordHasher
 from argon2.exceptions import VerifyMismatchError, InvalidHashError
 from fastapi import Depends, HTTPException
 from fastapi.security import  OAuth2PasswordBearer
-from policy import has_permission
+from API.policy import has_permission
 
 
 
@@ -67,6 +67,16 @@ def get_current_user(token: str = Depends(oauth2_scheme)) -> dict:
                           options={"require": ["exp", "sub", "role"]})
     except InvalidTokenError: 
         raise HTTPException(401, "invalid or expired token", headers ={"WWW-Authenticate": "Bearer"})
+
+
+#this handles none signed in memebers (i.e. anonymous roles)
+oauth2_optional = OAuth2PasswordBearer(tokenUrl="auth/login", auto_error=False)
+
+def get_user_or_anonymous(token: str | None = Depends(oauth2_optional)) -> dict:
+    if token is None:
+        return {"role": "anonymous"}
+    return get_current_user(token)
+
 
 
 def require_role(*allowed: str):
