@@ -13,9 +13,9 @@ CLEARANCE = {"anonymous": "public",
 PERMISSIONS = {
     "anonymous": {"knowledge:read"},
     "viewer": {"knowledge:read"},
-    "reviewer": {"knowledge:read","Knowlede:deicde"},
-    "custodian": {"knowledge:read","Knowlede:deicde","knowledge:submit", "consent:manage"},
-    "admin": {"knowledge:read", "knowledge:submit","knowledge:delete", "consent:manage","Knowlede:deicde","knowledge:submit","users:manage"}
+    "reviewer": {"knowledge:read","knowlede:decide"},
+    "custodian": {"knowledge:read","Knowledge:decide","knowledge:submit", "consent:manage"},
+    "admin": {"knowledge:read", "knowledge:submit","knowledge:delete", "consent:manage","Knowlede:decide","users:manage"}
 }
 
 
