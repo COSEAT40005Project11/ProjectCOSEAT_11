@@ -102,6 +102,7 @@ class ApproveBody(BaseModel):
     access: str = "community"          # public | community | restricted | sacred
     summary: str | None = None         # reviewer may correct the summary
     original_text: str | None = None   # reviewer may correct the source text
+    tags: list[str] | None = None      # tags the REVIEWER confirmed, not the AI's
 
 
 class RejectBody(BaseModel):
@@ -160,6 +161,11 @@ def approve(item_id: str, body: ApproveBody):
     if body.original_text is not None:
         rec["original_text"] = body.original_text
     rec["access"] = body.access
+    # only tags the reviewer confirmed are stored. AI suggestions live in
+    # AIOutput/tags/ and never become record tags on their own. Confirmed tags
+    # feed back into Models/tagging.py as retrieval evidence for later items.
+    if body.tags is not None:
+        rec["tags"] = [t.strip() for t in body.tags if t and t.strip()]
     rec["status"] = "approved"
     rec["reviewed_by"] = body.reviewed_by
     rec["reviewed_at"] = datetime.now(timezone.utc).isoformat()
@@ -221,6 +227,30 @@ def ask(q: str, access: str = "community"):
     retrieval = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(retrieval)
     return retrieval.answer(q, viewer_access=access)
+
+
+@app.get("/api/items/{item_id}/tags")
+def item_tags(item_id: str):
+    """Confidence-scored tag suggestions for a pending item (RAG, never applied).
+
+    Suggestions are read from AIOutput/tags/ if Models/tagging.py has already run,
+    otherwise they are computed on demand. Tags only reach a record when the
+    reviewer confirms them at the approve step.
+    """
+    import importlib.util
+    spec = importlib.util.spec_from_file_location(
+        "tagging", str(REPO_ROOT / "Models" / "tagging.py"))
+    tagging = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(tagging)
+
+    existing = tagging.suggestions_for(item_id)
+    if existing:
+        return existing
+
+    rec = _all_pending_records().get(item_id)
+    if rec is None:
+        raise HTTPException(404, "item not found in pending queue")
+    return tagging.tag_record(rec)
 
 
 @app.get("/health")
