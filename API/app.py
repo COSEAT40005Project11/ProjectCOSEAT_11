@@ -29,6 +29,22 @@ from fastapi.responses import JSONResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 
+#Access Control Stuff 
+from typing import Literal
+from fastapi import Depends
+from API.policy import LEVELS, CLEARANCE, can_view,can_decide, ask_level
+from API.auth import get_current_user, require_permission, get_user_or_anonymous
+
+from API.auth_routes import router as auth_router
+
+
+
+
+
+
+Level = Literal["public", "community", "restricted", "sacred"]
+#STAFF = ("admin", "reviewer", "custodian") #removing for now since permissions replace the function of STAFF
+# End of Access Control Stuff
 REPO_ROOT = Path(__file__).resolve().parent.parent
 PENDING_DIR = REPO_ROOT / "AIOutput" / "pending"
 APPROVED_DIR = REPO_ROOT / "AIOutput" / "approved"
@@ -39,7 +55,7 @@ for d in (PENDING_DIR, APPROVED_DIR, REJECTED_DIR):
     d.mkdir(parents=True, exist_ok=True)
 
 app = FastAPI(title="Traditional Knowledge Repository API", version="0.1.0")
-
+app.include_router(auth_router) #access stuff 
 
 # ---------------------------------------------------------------------------
 # helpers
@@ -93,6 +109,9 @@ def _to_item(rec: dict) -> dict:
         "reviewed_at": rec.get("reviewed_at"),
     }
 
+# Access Control goes here
+
+
 
 # ---------------------------------------------------------------------------
 # request models
@@ -113,7 +132,7 @@ class RejectBody(BaseModel):
 class SubmitBody(BaseModel):
     title: str
     text: str
-    access: str = "community"
+    access: Level = "community"
     source: str = "Manual submission"
 
 
@@ -121,21 +140,24 @@ class SubmitBody(BaseModel):
 # endpoints  (the contract the frontend fetches)
 # ---------------------------------------------------------------------------
 @app.get("/api/pending")
-def get_pending():
+def get_pending(user: dict = Depends(require_permission("knowledge:decide"))):
     decided = _decided_ids()
     items = [_to_item(r) for rid, r in _all_pending_records().items() if rid not in decided]
     # most on-topic first
+    items = [i for i in items if can_view(user, i["access"])] # -otherwise it returns any level of knowledge (scared texts can be viewed by any level of clearence)
     items.sort(key=lambda i: i["confidence"], reverse=True)
     return items
 
 
 @app.get("/api/approved")
-def get_approved():
+def get_approved(user: dict = Depends(get_user_or_anonymous)):
     items = []
     for f in sorted(APPROVED_DIR.glob("*.json")):
         rec = _read_json(f)
         if rec:
-            items.append(_to_item(rec))
+            item = _to_item(rec)
+            if can_view(user, item["access"]):
+                items.append(item)
     return items
 
 
@@ -151,10 +173,14 @@ def get_stats():
 
 
 @app.post("/api/items/{item_id}/approve")
-def approve(item_id: str, body: ApproveBody):
+def approve(item_id: str, body: ApproveBody, user=Depends(require_permission("knowledge:decide"))): #checking for permission rather than role now, easier to add or remove permissions or roles in future
+       
     rec = _all_pending_records().get(item_id)
     if rec is None:
         raise HTTPException(404, "item not found in pending queue")
+    if not (can_decide(user, rec.get("access", "community"))       
+            and can_decide(user, body.access)):
+        raise HTTPException(403, "insufficient clearance for this item")
     rec = dict(rec)
     if body.summary is not None:
         rec["summary"] = body.summary
@@ -167,7 +193,7 @@ def approve(item_id: str, body: ApproveBody):
     if body.tags is not None:
         rec["tags"] = [t.strip() for t in body.tags if t and t.strip()]
     rec["status"] = "approved"
-    rec["reviewed_by"] = body.reviewed_by
+    rec["reviewed_by"] = user["name"]  
     rec["reviewed_at"] = datetime.now(timezone.utc).isoformat()
     (APPROVED_DIR / f"{item_id}.json").write_text(
         json.dumps(rec, indent=2, ensure_ascii=False), encoding="utf-8")
@@ -177,7 +203,9 @@ def approve(item_id: str, body: ApproveBody):
 
 
 @app.post("/api/submit")
-def submit(body: SubmitBody):
+def submit(body: SubmitBody,  user: dict = Depends(require_permission("knowledge:submit"))):
+    if not can_view(user, body.access):
+        raise HTTPException(403, "insufficenient clearance for this access level")
     """Manual submission (e.g. an elder recording). Goes to the same HITL queue."""
     import uuid
     rec = {
@@ -192,6 +220,7 @@ def submit(body: SubmitBody):
         "relevance_score": 1.0,
         "status": "pending",
         "access": body.access,
+        "submitted_by": user["sub"],
         "reviewed_by": None,
         "reviewed_at": None,
         "ingested_at": datetime.now(timezone.utc).isoformat(),
@@ -202,10 +231,12 @@ def submit(body: SubmitBody):
 
 
 @app.post("/api/items/{item_id}/reject")
-def reject(item_id: str, body: RejectBody):
+def reject(item_id: str, body: RejectBody, user: dict = Depends(require_permission("knowledge:decide"))):
     rec = _all_pending_records().get(item_id)
     if rec is None:
         raise HTTPException(404, "item not found in pending queue")
+    if not can_decide(user, rec.get("access", "community")):
+        raise HTTPException(403, "insufficient clearence for this record")
     rec = dict(rec)
     rec["status"] = "rejected"
     rec["reviewed_by"] = body.reviewed_by
@@ -218,7 +249,7 @@ def reject(item_id: str, body: RejectBody):
 
 
 @app.get("/api/ask")
-def ask(q: str, access: str = "community"):
+def ask(q: str, user: dict = Depends(get_user_or_anonymous)):
     """Answer a question from approved records only, with citations, or abstain.
     Generates nothing: returns verbatim source passages so it cannot hallucinate."""
     import importlib.util
@@ -226,7 +257,7 @@ def ask(q: str, access: str = "community"):
         "retrieval", str(REPO_ROOT / "Models" / "retrieval.py"))
     retrieval = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(retrieval)
-    return retrieval.answer(q, viewer_access=access)
+    return retrieval.answer(q, viewer_access=ask_level(user))
 
 
 @app.get("/api/items/{item_id}/tags")
