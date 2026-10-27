@@ -442,15 +442,15 @@ const views = {
       const n = s.value.trim() ? s.value.trim().split(/\s+/).length : 0;
       document.getElementById("scount").textContent = `${n} word${n === 1 ? "" : "s"}`;
     });
-    const go = document.getElementById("go");
-    go.onclick = async () => {
+    const sendBtn = document.getElementById("go");   // not called "go": that name is the page-change function
+    sendBtn.onclick = async () => {
       const err = document.getElementById("serr");
       const title = document.getElementById("t").value.trim();
       const text = s.value.trim();
       if (!title || !text) { err.textContent = "Add a title and some text first."; return; }
       if (!document.getElementById("consent").checked) { err.textContent = "Please confirm you have permission to share this."; return; }
       err.textContent = "";
-      go.disabled = true;
+      sendBtn.disabled = true;
       try {
         await postJSON("/api/submit", {
           title, text,
@@ -459,7 +459,7 @@ const views = {
         });
         toast("Sent for review");
         go(role() === "admin" ? "review" : "browse");
-      } catch (e) { err.textContent = "Couldn't send it. Check your connection and try again."; go.disabled = false; }
+      } catch (e) { err.textContent = "Couldn't send it. Check your connection and try again."; sendBtn.disabled = false; }
     };
   },
 
