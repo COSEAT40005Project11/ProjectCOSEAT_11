@@ -125,6 +125,8 @@ def answer(query: str, viewer_access: str = "community",
             "access": rec.get("access", "community"),
             "score": round(score, 3),
             "id": rec.get("id"),
+            "attribution": {key: (rec.get("attribution") or {}).get(key) for key in
+                            ("community", "credit", "language", "permitted_use")},
         })
 
     return {"query": query, "abstained": False, "passages": passages}

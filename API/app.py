@@ -36,6 +36,7 @@ from API.policy import LEVELS, CLEARANCE, can_view,can_decide, ask_level
 from API.auth import get_current_user, require_permission, get_user_or_anonymous
 
 from API.auth_routes import router as auth_router
+from API.governance import Attribution, Access, review_lock, atomic_write, require_approval_metadata
 
 
 
@@ -107,6 +108,8 @@ def _to_item(rec: dict) -> dict:
         "summary_method": rec.get("summary_method"),
         "reviewed_by": rec.get("reviewed_by"),   # shown as provenance on approved items
         "reviewed_at": rec.get("reviewed_at"),
+        "tags": rec.get("tags", []),
+        "attribution": {k: (rec.get("attribution") or {}).get(k) for k in ("community", "credit", "language", "permitted_use")},
     }
 
 # Access Control goes here
@@ -118,7 +121,7 @@ def _to_item(rec: dict) -> dict:
 # ---------------------------------------------------------------------------
 class ApproveBody(BaseModel):
     reviewed_by: str
-    access: str = "community"          # public | community | restricted | sacred
+    access: Access = "community"       # public | community | restricted | sacred
     summary: str | None = None         # reviewer may correct the summary
     original_text: str | None = None   # reviewer may correct the source text
     tags: list[str] | None = None      # tags the REVIEWER confirmed, not the AI's
@@ -145,6 +148,9 @@ def get_pending(user: dict = Depends(require_permission("knowledge:decide"))):
     items = [_to_item(r) for rid, r in _all_pending_records().items() if rid not in decided]
     # most on-topic first
     items = [i for i in items if can_view(user, i["access"])] # -otherwise it returns any level of knowledge (scared texts can be viewed by any level of clearence)
+    records = _all_pending_records()
+    for item in items:
+        item["attribution"] = records[item["id"]].get("attribution", {})
     items.sort(key=lambda i: i["confidence"], reverse=True)
     return items
 
@@ -172,34 +178,51 @@ def get_stats():
     }
 
 
+@app.put("/api/items/{item_id}/attribution")
+def update_attribution(item_id: str, body: Attribution,
+                       user: dict = Depends(require_permission("consent:manage"))):
+    with review_lock:
+        if item_id in _decided_ids():
+            raise HTTPException(409, "Item has already been reviewed")
+        for path in sorted(PENDING_DIR.glob("*.json")):
+            records = _read_json(path)
+            if not isinstance(records, list):
+                continue
+            for rec in records:
+                if rec.get("id") == item_id:
+                    if not can_view(user, rec.get("access", "community")) or not can_view(user, body.allowed_access):
+                        raise HTTPException(403, "Insufficient clearance")
+                    rec["attribution"] = body.model_dump()
+                    rec["attribution_updated_by"] = user["sub"]
+                    rec["attribution_updated_at"] = datetime.now(timezone.utc).isoformat()
+                    atomic_write(path, records)
+                    return {"ok": True, "id": item_id}
+        raise HTTPException(404, "Item not found in pending queue")
+
+
 @app.post("/api/items/{item_id}/approve")
-def approve(item_id: str, body: ApproveBody, user=Depends(require_permission("knowledge:decide"))): #checking for permission rather than role now, easier to add or remove permissions or roles in future
-       
-    rec = _all_pending_records().get(item_id)
-    if rec is None:
-        raise HTTPException(404, "item not found in pending queue")
-    if not (can_decide(user, rec.get("access", "community"))       
-            and can_decide(user, body.access)):
-        raise HTTPException(403, "insufficient clearance for this item")
-    rec = dict(rec)
-    if body.summary is not None:
-        rec["summary"] = body.summary
-    if body.original_text is not None:
-        rec["original_text"] = body.original_text
-    rec["access"] = body.access
-    # only tags the reviewer confirmed are stored. AI suggestions live in
-    # AIOutput/tags/ and never become record tags on their own. Confirmed tags
-    # feed back into Models/tagging.py as retrieval evidence for later items.
-    if body.tags is not None:
-        rec["tags"] = [t.strip() for t in body.tags if t and t.strip()]
-    rec["status"] = "approved"
-    rec["reviewed_by"] = user["name"]  
-    rec["reviewed_at"] = datetime.now(timezone.utc).isoformat()
-    (APPROVED_DIR / f"{item_id}.json").write_text(
-        json.dumps(rec, indent=2, ensure_ascii=False), encoding="utf-8")
-    # if it had been rejected before, clear that
-    (REJECTED_DIR / f"{item_id}.json").unlink(missing_ok=True)
-    return {"ok": True, "status": "approved", "id": item_id}
+def approve(item_id: str, body: ApproveBody, user=Depends(require_permission("knowledge:decide"))):
+    with review_lock:
+        rec = _all_pending_records().get(item_id)
+        if rec is None:
+            raise HTTPException(404, "Item not found in pending queue")
+        if item_id in _decided_ids():
+            raise HTTPException(409, "Item has already been reviewed")
+        if not (can_decide(user, rec.get("access", "community")) and can_decide(user, body.access)):
+            raise HTTPException(403, "Insufficient clearance")
+        require_approval_metadata(rec, body.access)
+        rec = dict(rec)
+        if body.summary is not None:
+            rec["summary"] = body.summary
+        if body.original_text is not None:
+            rec["original_text"] = body.original_text
+        rec["access"] = body.access
+        if body.tags is not None:
+            rec["tags"] = [t.strip() for t in body.tags if t and t.strip()]
+        rec.update(status="approved", reviewed_by=user["sub"],
+                   reviewed_at=datetime.now(timezone.utc).isoformat())
+        atomic_write(APPROVED_DIR / f"{item_id}.json", rec)
+        return {"ok": True, "status": "approved", "id": item_id}
 
 
 @app.post("/api/submit")
@@ -210,6 +233,7 @@ def submit(body: SubmitBody,  user: dict = Depends(require_permission("knowledge
     import uuid
     rec = {
         "id": str(uuid.uuid4()),
+        "attribution": {},
         "source": {"title": body.title, "author": "", "year": "", "url": "",
                    "note": body.source},
         "source_file": "manual",
@@ -232,20 +256,21 @@ def submit(body: SubmitBody,  user: dict = Depends(require_permission("knowledge
 
 @app.post("/api/items/{item_id}/reject")
 def reject(item_id: str, body: RejectBody, user: dict = Depends(require_permission("knowledge:decide"))):
-    rec = _all_pending_records().get(item_id)
-    if rec is None:
-        raise HTTPException(404, "item not found in pending queue")
-    if not can_decide(user, rec.get("access", "community")):
-        raise HTTPException(403, "insufficient clearence for this record")
-    rec = dict(rec)
-    rec["status"] = "rejected"
-    rec["reviewed_by"] = body.reviewed_by
-    rec["reviewed_at"] = datetime.now(timezone.utc).isoformat()
-    rec["reject_reason"] = body.reason
-    (REJECTED_DIR / f"{item_id}.json").write_text(
-        json.dumps(rec, indent=2, ensure_ascii=False), encoding="utf-8")
-    (APPROVED_DIR / f"{item_id}.json").unlink(missing_ok=True)
-    return {"ok": True, "status": "rejected", "id": item_id}
+    with review_lock:
+        rec = _all_pending_records().get(item_id)
+        if rec is None:
+            raise HTTPException(404, "Item not found in pending queue")
+        if item_id in _decided_ids():
+            raise HTTPException(409, "Item has already been reviewed")
+        if not can_decide(user, rec.get("access", "community")):
+            raise HTTPException(403, "Insufficient clearance")
+        if not (body.reason or "").strip():
+            raise HTTPException(422, "Rejection reason is required")
+        rec = dict(rec)
+        rec.update(status="rejected", reviewed_by=user["sub"],
+                   reviewed_at=datetime.now(timezone.utc).isoformat(), reject_reason=body.reason)
+        atomic_write(REJECTED_DIR / f"{item_id}.json", rec)
+        return {"ok": True, "status": "rejected", "id": item_id}
 
 
 @app.get("/api/ask")
@@ -261,7 +286,7 @@ def ask(q: str, user: dict = Depends(get_user_or_anonymous)):
 
 
 @app.get("/api/items/{item_id}/tags")
-def item_tags(item_id: str):
+def item_tags(item_id: str, user: dict = Depends(require_permission("knowledge:decide"))):
     """Confidence-scored tag suggestions for a pending item (RAG, never applied).
 
     Suggestions are read from AIOutput/tags/ if Models/tagging.py has already run,
@@ -274,6 +299,11 @@ def item_tags(item_id: str):
     tagging = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(tagging)
 
+    rec = _all_pending_records().get(item_id)
+    if rec is None or item_id in _decided_ids():
+        raise HTTPException(404, "Item not found in pending queue")
+    if not can_view(user, rec.get("access", "community")):
+        raise HTTPException(403, "Insufficient clearance")
     existing = tagging.suggestions_for(item_id)
     if existing:
         return existing
