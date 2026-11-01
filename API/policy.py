@@ -24,13 +24,14 @@ PERMISSIONS = {
 
 
 
-def can_view(user, level):
-    cleareance = CLEARANCE.get(user.get("role"))
+def can_view(user: dict, level: str) -> bool:
+    clearance = CLEARANCE.get(user.get("role"))
+    if clearance is None or level not in LEVELS:
+        return False
+    return LEVELS.index(level) <= LEVELS.index(clearance)
 
-    return LEVELS.index(level) <= LEVELS.index(CLEARANCE[user["role"]])
-
-def can_decide(user, level):
-    return user["role"] in ("viewer","admin", "reviewer", "custodian", "anonymous") and can_view(user, level)
+def can_decide(user: dict, level: str) -> bool:
+    return has_permission(user, "knowledge:decide") and can_view(user, level)
 
 def has_permission(user: dict, permission: str) -> bool:
     return permission in PERMISSIONS.get(user.get("role"), set())

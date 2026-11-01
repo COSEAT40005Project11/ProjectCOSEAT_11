@@ -120,7 +120,6 @@ def _to_item(rec: dict) -> dict:
 # request models
 # ---------------------------------------------------------------------------
 class ApproveBody(BaseModel):
-    reviewed_by: str
     access: Access = "community"       # public | community | restricted | sacred
     summary: str | None = None         # reviewer may correct the summary
     original_text: str | None = None   # reviewer may correct the source text
@@ -128,7 +127,6 @@ class ApproveBody(BaseModel):
 
 
 class RejectBody(BaseModel):
-    reviewed_by: str
     reason: str | None = None
 
 
@@ -210,6 +208,8 @@ def approve(item_id: str, body: ApproveBody, user=Depends(require_permission("kn
             raise HTTPException(409, "Item has already been reviewed")
         if not (can_decide(user, rec.get("access", "community")) and can_decide(user, body.access)):
             raise HTTPException(403, "Insufficient clearance")
+        if rec.get("submitted_by") == user["sub"]:                              
+            raise HTTPException(403, "You cannot approve your own submission")  
         require_approval_metadata(rec, body.access)
         rec = dict(rec)
         if body.summary is not None:
@@ -219,7 +219,9 @@ def approve(item_id: str, body: ApproveBody, user=Depends(require_permission("kn
         rec["access"] = body.access
         if body.tags is not None:
             rec["tags"] = [t.strip() for t in body.tags if t and t.strip()]
-        rec.update(status="approved", reviewed_by=user["sub"],
+        rec.update(status="approved",
+                   reviewed_by=user.get("name") or user["sub"],               
+                   reviewed_by_id=user["sub"],                                 
                    reviewed_at=datetime.now(timezone.utc).isoformat())
         atomic_write(APPROVED_DIR / f"{item_id}.json", rec)
         return {"ok": True, "status": "approved", "id": item_id}
@@ -267,8 +269,11 @@ def reject(item_id: str, body: RejectBody, user: dict = Depends(require_permissi
         if not (body.reason or "").strip():
             raise HTTPException(422, "Rejection reason is required")
         rec = dict(rec)
-        rec.update(status="rejected", reviewed_by=user["sub"],
-                   reviewed_at=datetime.now(timezone.utc).isoformat(), reject_reason=body.reason)
+        rec.update(status="rejected",
+                   reviewed_by=user.get("name") or user["sub"],    
+                   reviewed_by_id=user["sub"],                      
+                   reviewed_at=datetime.now(timezone.utc).isoformat(),
+                   reject_reason=body.reason)
         atomic_write(REJECTED_DIR / f"{item_id}.json", rec)
         return {"ok": True, "status": "rejected", "id": item_id}
 

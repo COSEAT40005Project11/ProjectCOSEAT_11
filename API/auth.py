@@ -46,10 +46,11 @@ def verify_password(password: str, hashed: str) -> bool:
     except (VerifyMismatchError, InvalidHashError): 
         return False
 
-def create_access_token(user_id: str, role: str) -> str: 
+def create_access_token(user_id: str, role: str, name: str = "") -> str: 
     now = datetime.now(timezone.utc) # using utc idk what happens during daylight savings to tokens if they rely on timezones that change. 
     return jwt.encode( 
-        {"sub": user_id, 
+        {"sub": user_id,
+         "name": name,   
          "role": role, 
          "iat": now, 
          "exp": now + timedelta(minutes=TOKEN_MINS)},  #passed Subject (userid) their role and time of initialisation then passes an expiry time (now + the defined token length)
