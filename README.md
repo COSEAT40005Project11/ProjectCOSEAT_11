@@ -3,9 +3,9 @@
 
 ## Project Description
 
-The basis of this project is to develop an AI framework to identify, store, and retrieve traditional community knowledge from marginalized communities around the world. Inclusive software design is treated as an essential component of this project.
+The basis of this project is to develop an AI framework to identify, store, and retrieve traditional community knowledge from marginalized communities around the world. Inclusive software design is treated as an essential component of this project, along with following of the appropriate ethical protocols and principles.
 
-In the initial development phase, only established sources of knowledge will be included. The project will be extended in future phases to incorporate informal sources of knowledge.
+In the initial development phase and resulting prototype, only established sources of knowledge will be included or incorporated. The project could be extended in future phases to incorporate informal sources of knowledge.
 
 
 ## Main Objectives 
