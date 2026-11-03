@@ -1,8 +1,8 @@
 from fastapi import APIRouter, Depends, HTTPException
 from fastapi.security import OAuth2PasswordRequestForm
-
-from API.auth import hash_password, verify_password, create_access_token
 from API.user_repo import UserRepo, get_user_repo
+from API.auth import hash_password, verify_password, create_access_token, TOKEN_MINS   
+from API.policy import CLEARANCE, PERMISSIONS      
 
 router = APIRouter(prefix="/auth", tags=["auth"])
 
@@ -26,8 +26,11 @@ def login(form: OAuth2PasswordRequestForm = Depends(),
         )
 
     return {
-        "access_token": create_access_token(user.id, user.role),
+        "access_token": create_access_token(user.id, user.role, user.name),
         "token_type": "bearer",
         "name": user.name,     # for display in the UI only
         "role": user.role,     # for showing/hiding UI only; the server re-checks from the token
+        "clearance": CLEARANCE.get(user.role, "public"),                     
+        "permissions": sorted(PERMISSIONS.get(user.role, set())),             
+        "expires_in": TOKEN_MINS * 60, 
     }

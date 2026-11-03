@@ -1,3 +1,4 @@
+
 // Traditional Knowledge Repository - web frontend (Sprint 2)
 // Picks its data source on load:
 //   - served by the FastAPI backend (uvicorn API.app:app)  -> real API
@@ -14,15 +15,10 @@ const ACCESS = {
   restricted: { label: "Restricted",     icon: "lock" },
   sacred:     { label: "Sacred",         icon: "shield-alert" }
 };
-// DEMO ACCOUNTS ONLY. Replace with POST /auth/login once the backend has real authentication.
-const USERS = {
-  member: { pw: "member123", role: "member", name: "Community member" },
-  admin:  { pw: "admin123",  role: "admin",  name: "Admin reviewer" }
-};
-const CAN = { guest: ["public"], member: ["public", "community"], admin: ["public", "community", "restricted", "sacred"] };
-const NEED = { submit: ["member", "admin"], review: ["admin"] };
-// highest level each role may ask about (retrieval.py never returns sacred items)
-const ASK_LEVEL = { guest: "public", member: "community", admin: "restricted" };
+// Access levels, lowest to highest. The server decides what each user may see; this only mirrors it for the UI.
+const LEVELS = ["public", "community", "restricted", "sacred"];
+//Removed the previous USERS, and other const's here as they are on the backend now
+const NEED = { submit: "knowledge:submit", review: "knowledge:decide" };
 // offline copy: only PUBLIC items are ever saved on the device (shared kiosk / shared computer safety)
 const CACHE_KEY = "tkr_public_cache";
 
@@ -36,12 +32,24 @@ const store = {
 };
 
 let session = store.get("sessionStorage", "tkr");
+// forget a session that has expired, or one saved by the old demo login (it has no token)
+if (session && (!session.token || (session.expiresAt && Date.now() > session.expiresAt))) {
+  session = null;
+  store.del("sessionStorage", "tkr");
+}
 let next = null;          // page to return to after logging in
 let byId = {};            // items currently on screen, for the Listen button
 let viewGen = 0;          // bumps on every page change, so a slow load can't draw over a newer page
 const stale = g => g !== viewGen;
-const role = () => (session && CAN[session.role] ? session.role : "guest");
-const canSee = i => CAN[role()].includes(i.access);
+
+//added in the access control update
+const role = () => (session ? session.role : "guest");
+const clearance = () => (session && LEVELS.includes(session.clearance) ? session.clearance : "public");
+const levelsAllowed = () => LEVELS.slice(0, LEVELS.indexOf(clearance()) + 1);
+const canSee = i => levelsAllowed().includes(i.access);
+const can = p => !!(session && Array.isArray(session.permissions) && session.permissions.includes(p));
+// highest level the sample-data Ask may use (the real server works this out from the token; sacred is never returned)
+const askLevel = () => (clearance() === "sacred" ? "restricted" : clearance());
 
 const app = document.getElementById("app");
 const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
@@ -124,12 +132,12 @@ const mock = (() => {
       if (!rec) throw new Error("404 item not found in pending queue");
       if (m[2] === "reject") { rejected++; return { ok: true, status: "rejected", id: rec.id }; }
       approved.push({ ...rec, status: "approved", access: body.access, summary: body.summary ?? rec.summary,
-        original_text: body.original_text ?? rec.original_text, tags: body.tags || [], reviewed_by: body.reviewed_by, reviewed_at: new Date().toISOString() });
+        original_text: body.original_text ?? rec.original_text, tags: body.tags || [], reviewed_by: session ? session.name : "Demo reviewer", reviewed_at: new Date().toISOString() });
       return { ok: true, status: "approved", id: rec.id };
     }
     if (p === "/api/ask") {
       const q = new Set(words(url.searchParams.get("q")));
-      const lvl = RANK[url.searchParams.get("access")] ?? 1;
+      const lvl = RANK[askLevel()] ?? 1;
       const scored = approved.filter(x => x.access in RANK && RANK[x.access] <= lvl).map(x => {
         const w = words(x.title + " " + x.original_text);
         return { x, score: w.filter(t => q.has(t)).length / Math.max(q.size, 1) };
@@ -142,13 +150,33 @@ const mock = (() => {
   };
 })();
 
+// End the login session (expired or rejected token) and send the person to the login page.
+function endSession(message) {
+  session = null;
+  store.del("sessionStorage", "tkr");
+  const here = pageFromAddress();
+  if (here !== "login") next = here;          // come back to this page after logging in
+  if (message) toast(message);
+  go("login");
+}
+
 async function api(path, opts = {}) {
   if (!USE_API) return mock(path, opts);
+  const headers = { ...(opts.headers || {}) };
+  if (session && session.token) headers.Authorization = `Bearer ${session.token}`;
   const ctl = new AbortController();
   const timer = setTimeout(() => ctl.abort(), 10000);   // don't hang forever on a slow connection
   try {
-    const res = await fetch(API + path, { ...opts, signal: ctl.signal });
-    if (!res.ok) throw new Error(`${res.status} ${res.statusText}`);
+    const res = await fetch(API + path, { ...opts, headers, signal: ctl.signal });
+    if (res.status === 401 && session) {                 // token expired or no longer valid
+      endSession("Your session expired. Please log in again.");
+      throw new Error("401 Session expired");
+    }
+    if (!res.ok) {
+      let msg = `${res.status} ${res.statusText}`;
+      try { const d = await res.json(); if (typeof d.detail === "string") msg = d.detail; } catch (e) { /* not JSON */ }
+      throw new Error(msg);
+    }
     return await res.json();
   } finally { clearTimeout(timer); }
 }
@@ -229,7 +257,7 @@ function approvedCard(i) {
   </article>`;
 }
 
-function accessSelect(id, current, levels = Object.keys(ACCESS)) {
+function accessSelect(id, current, levels = levelsAllowed()) {
   return `<select id="acc-${esc(id)}" aria-label="Access level">` +
     levels.map(k => `<option value="${k}" ${k === current ? "selected" : ""}>${ACCESS[k].label}</option>`).join("") +
     `</select>`;
@@ -267,7 +295,7 @@ function reviewCard(i) {
       <button class="btn reject" data-reject="${id}">${ic("x")} Reject</button>
     </div>
     <div class="reject-box" id="rj-${id}" hidden>
-      <label for="why-${id}">Why is this being rejected? (optional, kept in the record)</label>
+      <label for="why-${id}">Why is this being rejected? (required, kept in the record)</label>
       <textarea id="why-${id}" rows="2" placeholder="For example: wrong community, needs elder permission, inaccurate"></textarea>
       <div class="actions" style="margin-top:.6rem">
         <button class="btn reject" data-confirm-reject="${id}">Confirm reject</button>
@@ -303,7 +331,7 @@ const views = {
       const g = viewGen;
       box.innerHTML = `<p class="sub">Searching approved sources...</p>`;
       try {
-        const r = await api(`/api/ask?q=${encodeURIComponent(query)}&access=${ASK_LEVEL[role()]}`);
+        const r = await api(`/api/ask?q=${encodeURIComponent(query)}`);
         if (stale(g)) return;
         if (r.abstained) {
           box.innerHTML = `<div class="card abstain">
@@ -352,7 +380,7 @@ const views = {
     catch (e) { if (!stale(g)) app.innerHTML = `<h2>Browse</h2>` + empty("wifi-off", "Can't reach the server, and nothing is saved on this device yet."); return; }
 
     if (stale(g)) return;
-    const levels = CAN[role()];
+    const levels = levelsAllowed();
     let level = "all";
     app.innerHTML = `<h2>Browse</h2>
       ${res.offline ? offlineBanner(res.at) : ""}
@@ -399,26 +427,39 @@ const views = {
   login() {
     app.innerHTML = `<h2>Log in</h2><p class="sub">Log in to submit knowledge or review submissions.</p>
       <form id="lf" class="form-card">
-        <label for="u">Username</label><input id="u" autocomplete="username">
+        <label for="u">Email</label><input id="u" type="email" autocomplete="username">
         <label for="p">Password</label><input id="p" type="password" autocomplete="current-password">
         <p class="err" id="err" role="alert"></p>
         <button class="btn" type="submit">${ic("log-in")} Log in</button>
-      </form>
-      <div class="hint">Demo accounts (prototype only): <b>member</b> / member123 and <b>admin</b> / admin123</div>`;
+      </form>`;
     document.getElementById("u").focus();
-    document.getElementById("lf").onsubmit = e => {
+    document.getElementById("lf").onsubmit = async e => {
       e.preventDefault();
-      const u = USERS[document.getElementById("u").value.trim().toLowerCase()];
-      if (!u || u.pw !== document.getElementById("p").value) {
-        document.getElementById("err").textContent = "Wrong username or password. Check both and try again.";
-        return;
-      }
-      session = { role: u.role, name: u.name };
-      store.set("sessionStorage", "tkr", session);
-      toast("Logged in as " + u.name);
-      const dest = next || "search";
-      next = null;
-      go(dest);
+      const err = document.getElementById("err");
+      const btn = e.target.querySelector("button");
+      err.textContent = "";
+      if (!USE_API) { err.textContent = "Logging in needs the repository server. This page is running on sample data."; return; }
+      btn.disabled = true;
+      try {
+        const res = await fetch(API + "/auth/login", {
+          method: "POST",
+          headers: { "Content-Type": "application/x-www-form-urlencoded" },   // the login route reads form data, not JSON
+          body: new URLSearchParams({ username: document.getElementById("u").value.trim(), password: document.getElementById("p").value })
+        });
+        if (res.status === 401) { err.textContent = "Wrong email or password. Check both and try again."; return; }
+        if (res.status === 429) { err.textContent = "Too many attempts. Wait a minute and try again."; return; }
+        if (!res.ok) throw new Error(res.status);
+        const d = await res.json();
+        session = { token: d.access_token, name: d.name, role: d.role, clearance: d.clearance,
+                    permissions: d.permissions, expiresAt: Date.now() + d.expires_in * 1000 };
+        store.set("sessionStorage", "tkr", session);
+        toast("Logged in as " + d.name);
+        const dest = next || "search";
+        next = null;
+        go(dest);
+      } catch (x) {
+        err.textContent = "Couldn't log in. Check your connection and try again.";
+      } finally { btn.disabled = false; }
     };
   },
 
@@ -458,7 +499,7 @@ const views = {
           source: `Manual submission by ${session.name}; submitter confirmed permission from the knowledge holder`
         });
         toast("Sent for review");
-        go(role() === "admin" ? "review" : "browse");
+        go(can("knowledge:decide") ? "review" : "browse");
       } catch (e) { err.textContent = "Couldn't send it. Check your connection and try again."; sendBtn.disabled = false; }
     };
   },
@@ -526,11 +567,15 @@ async function loadTags(id) {
 
 async function decide(id, action) {
   const card = document.getElementById(`card-${id}`);
+  let reason = null;
+  if (action === "reject") {
+    reason = document.getElementById(`why-${id}`).value.trim();
+    if (!reason) { toast("Please give a reason for rejecting this item."); return; }
+  }
   card.querySelectorAll("button").forEach(b => (b.disabled = true));
   try {
     if (action === "approve") {
       await postJSON(`/api/items/${encodeURIComponent(id)}/approve`, {
-        reviewed_by: session.name,
         access: document.getElementById(`acc-${id}`).value,
         summary: document.getElementById(`sum-${id}`).value,
         original_text: document.getElementById(`src-${id}`).value,
@@ -538,10 +583,7 @@ async function decide(id, action) {
       });
       toast("Approved and added to the repository");
     } else {
-      await postJSON(`/api/items/${encodeURIComponent(id)}/reject`, {
-        reviewed_by: session.name,
-        reason: document.getElementById(`why-${id}`).value.trim() || null
-      });
+      await postJSON(`/api/items/${encodeURIComponent(id)}/reject`, { reason });
       toast("Rejected");
     }
     await refreshCount();
@@ -557,7 +599,7 @@ app.addEventListener("click", e => {
   if (!b) return;
   if (b.dataset.listen) return toggleListen(b);
   if (b.dataset.approve || b.dataset.reject || b.dataset.confirmReject || b.dataset.cancelReject) {
-    if (role() !== "admin") { toast("Only reviewers can do this."); return; }
+    if (!can("knowledge:decide")) { toast("Only reviewers can do this."); return; }
   }
   if (b.dataset.approve) return decide(b.dataset.approve, "approve");
   if (b.dataset.reject) {
@@ -575,7 +617,7 @@ app.addEventListener("click", e => {
 // ---------------------------------------------------------------------------
 async function refreshCount() {
   const c = document.getElementById("count");
-  if (role() !== "admin") { c.hidden = true; return; }
+  if (!can("knowledge:decide")) { c.hidden = true; return; }
   try {
     const s = await api("/api/stats");
     c.textContent = s.pending;
@@ -584,7 +626,7 @@ async function refreshCount() {
 }
 
 function chrome() {
-  document.getElementById("reviewBtn").hidden = role() !== "admin";
+  document.getElementById("reviewBtn").hidden = !can("knowledge:decide");
   document.getElementById("auth").innerHTML = session
     ? `<span class="who ${esc(session.role)}">${esc(session.name)}</span><button id="lo">${ic("log-out")} Log out</button>`
     : `<button id="li">${ic("log-in")} Log in</button>`;
@@ -610,9 +652,9 @@ window.addEventListener("hashchange", () => show(pageFromAddress()));
 function show(view) {
   viewGen++;
   stopSpeaking();
-  if (NEED[view] && !NEED[view].includes(role())) {
+  if (NEED[view] && !can(NEED[view])) {
     if (role() === "guest") { next = view; toast("Log in to continue."); view = "login"; }
-    else { toast("This page is for reviewers only."); view = "search"; }
+    else { toast(view === "review" ? "This page is for reviewers only." : "Your account can't submit knowledge."); view = "search"; }
   }
   // keep the address bar in step without adding an extra history step (e.g. after a redirect to login)
   if (location.hash.slice(1) !== view) history.replaceState(null, "", "#" + view);
@@ -673,3 +715,4 @@ detectApi().then(ok => {
   if (mode) mode.textContent = ok ? "Connected to the repository API." : "Running on sample data (no backend connected).";
   show(pageFromAddress());
 });
+ 
